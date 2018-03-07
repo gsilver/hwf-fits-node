@@ -42,7 +42,7 @@
           <small id="instructorDescription" class="form-text text-muted">Test users: eickmeya, oliviaor</small>
         </div>
         <div class="alert alert-danger" ng-show="lookUpPersonError && instructorInput">{{instructorInput}} does not exist</div>
-        <button class="btn btn-primary" ng-click="lookUpPerson(instructorInput)">Lookup {{instructorInput}}</button>
+        <button class="btn btn-primary" ng-click="clickGetCourses(instructorInput)">Lookup {{instructorInput}}</button>
         <!-- this is not needed, we have magic, do not need to disambiguate -->
         <!-- <div class="form-group" ng-show="disambiguationNeeded">
           <br>

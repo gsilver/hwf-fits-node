@@ -1,6 +1,7 @@
 var request = require('request');
 require('dotenv').config();
 
+console.log(__dirname);
 // will also need to get terms, maybe hard coded for now
 
 function getToken() {
@@ -36,7 +37,7 @@ function getToken() {
 module.exports = function (app) {
 
   app.get('/api/courses/:user_id', function (req, res) {
-    console.log('getting courses');
+    console.log('getting courses from router');
     var token = getToken();
     var options = {
       method: 'GET',
