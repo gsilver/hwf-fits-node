@@ -1,8 +1,8 @@
-  scheduleApp.factory('Get', ['$http',function($http) {
+scheduleApp.factory('Get', function ($http, $rootScope, $log) {
     return {
-      getCourses : function(userId) {
-        console.log('service request');
-        return $http.get('/api/courses/' + userId).then(function(data){
+      getCourses : function(termId, userId) {
+        $log.info('factory request for courses for term ' + termId + ' for user ' + userId);
+        return $http.get('/api/courses/' + termId + '/' + userId).then(function(data){
           //ESB will return a 200, with an object that  reveals the actual
           // status code i.e.
           //{ "httpCode":"401", "httpMessage":"Unauthorized", "moreInformation":"Client id not registered." }
@@ -10,15 +10,15 @@
           return data;
         });
       },
-      getCourse : function(courseId) {
-        return $http.get('/api/courses/' + courseId).then(function(data){
+      getCourse : function(termId, courseId) {
+        return $http.get('/api/course/' + termId + '/' + courseId).then(function(data){
           //ESB will return a 200, with an object that  reveals the actual
           // status code i.e.
           //{ "httpCode":"401", "httpMessage":"Unauthorized", "moreInformation":"Client id not registered." }
           // so will need to examp the payload status code
-          return result;
+          return data;
         });
 
       }
     };
-  }]);
+  });

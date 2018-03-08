@@ -19,14 +19,15 @@
     <![endif]-->
 </head>
 
-<body ng-app="scheduleApp">
-  <div class="container" ng-controller="mainController">
+<body ng-app="fitsApp">
+  <div class="container" ng-controller="fitsController">
     <h1>FITS <small>(Faculty Istructional Teaching  Scheduler)</small></h1>
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
           <label for="termSelect" ng-model="termInput">Term</label>
-          <select name="term" id="termSelect" class="form-control">
+          {{termInput}}
+          <select name="term" id="termSelect" class="form-control" ng-model="termInput">
             <option value="2170">Winter 2018</option>
             <option value="2180">Spring 2018</option>
             <option value="2190">Summer 2018</option>
@@ -42,7 +43,7 @@
           <small id="instructorDescription" class="form-text text-muted">Test users: eickmeya, oliviaor</small>
         </div>
         <div class="alert alert-danger" ng-show="lookUpPersonError && instructorInput">{{instructorInput}} does not exist</div>
-        <button class="btn btn-primary" ng-click="clickGetCourses(instructorInput)">Lookup {{instructorInput}}</button>
+        <button class="btn btn-primary" ng-click="lookUpPerson(instructorInput)">Lookup {{instructorInput}}</button>
         <!-- this is not needed, we have magic, do not need to disambiguate -->
         <!-- <div class="form-group" ng-show="disambiguationNeeded">
           <br>
@@ -137,9 +138,12 @@
 
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.js"></script>
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.js"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
   <script type="text/javascript" src="js/app.js"></script>
   <script type="text/javascript" src="js/controllers.js"></script>

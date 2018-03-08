@@ -1,7 +1,6 @@
 var request = require('request');
 require('dotenv').config();
 
-console.log(__dirname);
 // will also need to get terms, maybe hard coded for now
 
 function getToken() {
@@ -36,25 +35,26 @@ function getToken() {
 
 module.exports = function (app) {
 
-  app.get('/api/courses/:user_id', function (req, res) {
-    console.log('getting courses from router');
-    var token = getToken();
+  app.get('/api/courses/:term_id/:user_id', function (req, res) {
+    console.log('routes request for courses for term ' + req.params.term_id + ' for user ' + req.params.user_id);
+//    console.log('getting courses for term' + req.params.term_id + ' for user ' + req.params.user_id);
+    //var token = getToken();
     var options = {
       method: 'GET',
-      url: 'https://apigw-tst.it.umich.edu/um/aa/Instructors/REPLACE_UNIQNAME/Terms/REPLACE_TERMCD/Classes',
+      url: 'https://apigw-tst.it.umich.edu/um/aa/Instructors/' + req.params.user_id + '/Terms/' + req.params.term_id + '/Classes',
       headers:  {
         accept: 'application/json',
-        authorization: 'Bearer ' + token,
+        authorization: 'Bearer ' + 'xxx', ///token,
         'x-ibm-client-id': process.env.CLIENTID }
       };
       console.log(options);
-    request(options, function (error, response, body) {
-      if (error) {
-        return console.error('Failed: %s', error.message);
-      }
-      console.log('Success: ', body);
-      res.send(body);
-    });
+    // request(options, function (error, response, body) {
+    //   if (error) {
+    //     return console.error('Failed: %s', error.message);
+    //   }
+    //   console.log('Success: ', body);
+    //   res.send(body);
+    // });
   });
 
   app.get('/api/course/:course_id', function (req, res) {
@@ -77,7 +77,13 @@ module.exports = function (app) {
   });
 
   // application -------------------------------------------------------------
-  app.get('*', function (req, res) {
-      res.sendFile(__dirname + '/public/index.html'); // load the single view file (angular will handle the page changes on the front-end)
+  app.get('/', function (req, res) {
+    console.log('def route');
+    res.sendFile(__dirname + './public/main.html'); // load the single view file (angular will handle the page changes on the front-end)
   });
+
+  // app.get('*', function (req, res) {
+  //   console.log('def route');
+  //     res.sendFile(__dirname + '/public/index.html'); // load the single view file (angular will handle the page changes on the front-end)
+  // });
 };
