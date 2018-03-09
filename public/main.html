@@ -38,7 +38,7 @@
           <small id="instructorDescription" class="form-text text-muted">Test users: eickmeya, oliviaor</small>
         </div>
         <div class="alert alert-danger" ng-show="lookUpPersonError && instructorInput">{{instructorInput}} does not exist</div>
-        <button class="btn btn-primary" ng-click="clickGetCourses(instructorInput)">Lookup {{instructorInput}}</button>
+        <button class="btn btn-primary" ng-disabled="loading" ng-click="clickGetCourses(instructorInput)">Lookup {{instructorInput}}</button> <span ng-show="loading"> Working hard!</span>
       </div>
       <div class="col-md-6">
         <div>
@@ -107,7 +107,7 @@
       </tbody>
 
     </table>
-    <div ng-show="classListSchedule">
+    <div ng-show="classListSchedule.length">
       <button type="button" class="btn btn-primary" ng-click="downloadICS()">
         This is fine, download ICS
       </button> <small>(for importing into Google calendar)</small>

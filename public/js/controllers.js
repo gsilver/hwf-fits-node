@@ -1,5 +1,5 @@
 //TODO: bower install arrow-js --save
-//TODO: port ics parser
+//TODO: port ics parser (and deal with multimeeting classes)
 //TODO: port building parser
 //TODO: delete old js files when done
 //TODO: package Bower/Grunt
@@ -23,6 +23,8 @@ scheduleApp.controller('mainController', ['$scope','$http', '$log', 'Get', funct
 
   //triggered with button click
   $scope.clickGetCourses = function () {
+    //start spinner
+    $scope.loading = true;
     var termId = $scope.termInput.id;
     var userId = $scope.instructorInput;
     $scope.classListSchedule =[];
@@ -34,21 +36,28 @@ scheduleApp.controller('mainController', ['$scope','$http', '$log', 'Get', funct
         if(data.data.statusCode === 200) {
           var parsedBody = JSON.parse(data.data.body);
           $scope.courses = parsedBody.getInstrClassListResponse.InstructedClass;
+          //When the ESB returns an object instead of an array
+          // turn the object into an array of one
           if($scope.courses.length === undefined){
             $scope.courses = [].concat($scope.courses);
           }
-          $scope.loading = false;
-          _.each($scope.courses, function(course){
-            $log.warn(course);
+          // loop over courses array and call another API
+          // to get course details
+          _.each($scope.courses, function(course, i){
+            $log.info(course);
             Get.getCourse(termId, course.ClassNumber)
              .then(function(data) {
                var parsedBody = JSON.parse(data.data.body);
-               console.log(parsedBody.getSOCSectionListByNbrResponse.ClassOffered);
+               if(parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting.length === undefined){
+                 parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting = [].concat(parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting);
+               }
                $scope.classListSchedule.push(parsedBody.getSOCSectionListByNbrResponse.ClassOffered);
-             //courseList.push// push to course list
-             // this spinner will depend on a counter i
-             $scope.loading = false;
+               if(i + 1 === $scope.courses.length){
+                 //done retrieving courses, stop spinner
+                 $scope.loading = false;
+               }
            });
+
          });
        } else {
          $log.warn(data.data.httpCode + ', ' + data.data.httpMessage + ', ' + data.data.moreInformation);

@@ -1,9 +1,6 @@
 var request = require('request');
 require('dotenv').config();
 
-// will also need to get terms, maybe hard coded for now
-token ='';
-
 function getToken(scope) {
   //return new Promise((resolve, reject) => {
   // POST FOR A TOKEN,
@@ -31,7 +28,6 @@ function getToken(scope) {
       return body;
     }
   });
-
 }
 
 
@@ -49,7 +45,7 @@ module.exports = function (app) {
           'x-ibm-client-id': process.env.CLIENTID
           }
         };
-      console.log(options);
+      //console.log(options);
       request(options, function (error, response, body) {
         if (error | response.statusCode === 401) {
           // token has expired
@@ -74,18 +70,11 @@ module.exports = function (app) {
 
     request(options, function (error, response, body) {
       if (error) return console.error('Failed: %s', error.message);
-      console.log('Success: ', body);
       res.send(response);
     });
   });
 
-  // application -------------------------------------------------------------
   app.get('/', function (req, res) {
     res.sendFile(__dirname + '/public/main.html'); // load the single view file (angular will handle the page changes on the front-end)
   });
-
-  // app.get('*', function (req, res) {
-  //   console.log('def route');
-  //     res.sendFile(__dirname + '/public/index.html'); // load the single view file (angular will handle the page changes on the front-end)
-  // });
 };
