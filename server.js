@@ -1,7 +1,7 @@
 // set up ======================================================================
 var express = require('express');
 var app = express();
-var port = process.env.PORT || 8080; 				// set the port
+var port = process.env.PORT || 8090; 				// set the port
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
