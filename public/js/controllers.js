@@ -32,22 +32,32 @@ scheduleApp.controller('mainController', ['$scope','$http', '$log', 'Get', funct
 
   //triggered with button click
   $scope.clickGetCourses = function () {
+    $scope.catastrophicError = false;
     //start spinner
     $scope.loading = true;
     var termId = $scope.termInput.id;
     var userId = $scope.instructorInput;
     $scope.classListSchedule =[];
-    $log.info('controller request for courses for term ' + termId + ' for user ' + userId);
     Get.getCourses(termId, userId)
       .then(function(data) {
         if(data.data.statusCode === 200) {
           var parsedBody = JSON.parse(data.data.body);
-          $scope.courses = parsedBody.getInstrClassListResponse.InstructedClass;
-          //When the ESB returns an object instead of an array
-          // turn the object into an array of one
-          if($scope.courses.length === undefined){
-            $scope.courses = [].concat($scope.courses);
+          console.log(parsedBody);
+          if(parsedBody.getInstrClassListResponse.InstructedClass){
+            if($.isArray(parsedBody.getInstrClassListResponse.InstructedClass)){
+              // ESB returns an array when multiple courses
+              $scope.courses = parsedBody.getInstrClassListResponse.InstructedClass;
+            }
+            else {
+              // ESB returns an object with one course - turn it into an array
+              $scope.courses = [].concat(parsedBody.getInstrClassListResponse.InstructedClass);
+            }
+          } else {
+            // ESB has returned nothing
+            $scope.courses = [];
+            $scope.loading = false;
           }
+
           // loop over courses array and call another API
           // to get course details
           _.each($scope.courses, function(course, i){
@@ -66,6 +76,8 @@ scheduleApp.controller('mainController', ['$scope','$http', '$log', 'Get', funct
 
          });
        } else {
+         $scope.catastrophicError = true;
+         $scope.loading=false;
          $log.warn(data);
          $log.warn(data.data.httpCode + ', ' + data.data.httpMessage + ', ' + data.data.moreInformation);
        }
@@ -73,15 +85,12 @@ scheduleApp.controller('mainController', ['$scope','$http', '$log', 'Get', funct
   };
 
   var getBuilding = function(building){
-    if(building==='ARR'){
-      return 'ARR';
-    }
     var buildingArr = building.split(' ');
     var buildingObj =  _.findWhere($scope.buildings, {Abbreviation: buildingArr[1]});
     if(buildingObj){
         buildingArr = [buildingArr[0],buildingObj.Name];
     }
-    return buildingArr;
+    return buildingArr.join(' ');
   };
 
 
@@ -118,7 +127,13 @@ scheduleApp.controller('mainController', ['$scope','$http', '$log', 'Get', funct
       var timeStart = moment(time[0], 'HHA').format('k0000');
       var timeEnd = moment(time[1], 'HHA').format('k0000');
       var courseTopic = course.ClassTopic?course.ClassTopic:'';
-      var building  = getBuilding(course.Meeting.Location);
+      var building  = '';
+      if(course.Meeting.Location ==='ARR'){
+        building = 'ARR';
+      } else {
+        building = getBuilding(course.Meeting.Location) + ', University of Michigan, Ann Arbor';
+      }
+        getBuilding(course.Meeting.Location);
       var daysKeys = ['Mo','Tu', 'We', 'Th', 'Fr'];
       var days = [];
       _.each(daysKeys, function(key){
@@ -137,7 +152,7 @@ scheduleApp.controller('mainController', ['$scope','$http', '$log', 'Get', funct
       'RRULE:FREQ=WEEKLY;UNTIL=' + moment(course.Meeting.EndDate, 'MM/DD/YYYY').format('YYYYMMDDT000000') + 'Z;BYDAY=' + days.join() + '\n' +
       'UID:' + moment().format('x') + i + '-' + $scope.instructorInput + '@class-calendar-generator.umich.edu\n' +
       'DESCRIPTION:' + courseTopic + ' ' + course.CourseDescr + '\n' +
-      'LOCATION:' + building[0] + ' ' + building[1] + ', University of Michigan, Ann Arbor' + '\n' +
+      'LOCATION:' + building + '\n' +
       'END:VEVENT\n';
       if (i + 1 === arrayLen){
         iCal = iCal + 'END:VCALENDAR';

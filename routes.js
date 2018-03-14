@@ -4,7 +4,6 @@ require('dotenv').config();
 module.exports = function (app) {
 
   app.get('/api/tokens/:scope', function (req, res) {
-    //console.log(req);
     var options = {
       method: 'POST',
       url: 'https://apigw-tst.it.umich.edu/um/aa/oauth2/token',
@@ -32,8 +31,6 @@ module.exports = function (app) {
   });
 
   app.get('/api/courses/:term_id/:user_id', function (req, res) {
-      //var token = getToken('umscheduleofclasses');
-      //console.log('from courses request ' + app.locals.instructor_token);
       var options = {
         method: 'GET',
         url: 'https://apigw-tst.it.umich.edu/um/aa/Instructors/' + req.params.user_id + '/Terms/' + req.params.term_id + '/Classes',
@@ -43,13 +40,9 @@ module.exports = function (app) {
           'x-ibm-client-id': process.env.CLIENTID
           }
         };
-      //console.log(options);
       request(options, function (error, response, body) {
         if (error | response.statusCode === 401) {
-          // token has expired
-          //return console.error('Failed: %s', response.statusCode + ', ' + response.body);
         }
-        //console.log(response);
         res.send(response);
       });
   });
@@ -73,18 +66,12 @@ module.exports = function (app) {
 
     request(options, function (error, response, body) {
       if (error) return console.error('Failed: %s', error.message);
-      console.log('Success: ', body);
       res.send(response);
     });
   });
 
-  // application -------------------------------------------------------------
   app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/public/main.html'); // load the single view file (angular will handle the page changes on the front-end)
+    res.sendFile(__dirname + '/public/main.html');
   });
 
-  // app.get('*', function (req, res) {
-  //   console.log('def route');
-  //     res.sendFile(__dirname + '/public/index.html'); // load the single view file (angular will handle the page changes on the front-end)
-  // });
 };
