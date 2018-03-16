@@ -1,17 +1,13 @@
 {
   "name": "node-todo",
   "version": "0.0.1",
-  "description": "Simple todo application.",
+  "description": "Node/Angular app using the UM ESB to retrieve public chedule information on instructors and transform it to .ics for import into Google Calendar",
   "main": "server.js",
-  "author": "Scotch",
+  "author": "T&L ITS",
   "dependencies": {
-    "body-parser": "^1.18.2",
     "dotenv": "^5.0.1",
     "express": "^4.10.8",
-    "method-override": "^2.3.10",
-    "mongoose": "4.10.8",
     "morgan": "^1.9.0",
-    "request": "^2.83.0",
-    "request-promise": "^4.2.2"
+    "request": "^2.83.0"
   }
 }
