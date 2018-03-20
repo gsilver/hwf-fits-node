@@ -19,12 +19,15 @@ module.exports = function (app) {
         scope: req.params.scope
       }
     };
+    console.log(req.params.scope);
     request(options, function (error, response, body, next) {
       if (error){
         return console.error('Failed: %s', error.message);
       }
       else {
+
         var bodyObj = JSON.parse(body);
+        res.send('ok');
         app.locals[req.params.scope + '_token'] = bodyObj.access_token;
       }
     });

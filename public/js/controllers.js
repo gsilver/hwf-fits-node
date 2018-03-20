@@ -1,5 +1,4 @@
-//TODO: bower install arrow-js --save
-//TODO: package Bower/Grunt
+//TODO: package with Bower/Grunt
 //TODO: get terms from ESB
 
 // inject the  service factory into our controller
@@ -31,14 +30,17 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
   //TODO - may need to do sort the array by term id when we get it from ESB
   $scope.termInput = $scope.terms[0];
 
-  // get the tokens on page load
-  Get.getTokens('instructors')
-    .then(function(data) {});
-  Get.getTokens('umscheduleofclasses')
-    .then(function(data) {});
+  //get the tokens on page load
+  // NOTE: getting tokens only when request for courses or course fail
+  // with a 401
+  // Get.getTokens('instructors')
+  //   .then(function(data) {});
+  // Get.getTokens('umscheduleofclasses')
+  //   .then(function(data) {});
 
   //triggered with button click
   $scope.clickGetCourses = function() {
+    $log.info('getting courses');
     $scope.catastrophicError = false;
     //start spinner
     $scope.loading = true;
@@ -48,6 +50,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     $scope.classListSchedule = [];
     Get.getCourses(termId, userId)
       .then(function(data) {
+        $log.warn(data.data.statusCode);
         if (data.data.statusCode === 200) {
           var parsedBody = JSON.parse(data.data.body);
           if (parsedBody.getInstrClassListResponse.InstructedClass) {
@@ -68,26 +71,47 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
           _.each($scope.courses, function(course, i) {
             Get.getCourse(termId, course.ClassNumber)
               .then(function(data) {
-                var parsedBody = JSON.parse(data.data.body);
-                if (parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting.length === undefined) {
-                  // ESB has returned an object Meeting as there is only one, so turn into an array
-                  parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting = [].concat(parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting);
-                }
-                //push this course object to the array
-                $scope.classListSchedule.push(parsedBody.getSOCSectionListByNbrResponse.ClassOffered);
-                if (i + 1 === $scope.courses.length) {
-                  //done retrieving courses, stop spinner
-                  $scope.loading = false;
+                if(data.data.statusCode ===200){
+                  var parsedBody = JSON.parse(data.data.body);
+                  if (parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting.length === undefined) {
+                    // ESB has returned an object Meeting as there is only one, so turn into an array
+                    parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting = [].concat(parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting);
+                  }
+                  //push this course object to the array
+                  $scope.classListSchedule.push(parsedBody.getSOCSectionListByNbrResponse.ClassOffered);
+                  if (i + 1 === $scope.courses.length) {
+                    //done retrieving courses, stop spinner
+                    $scope.loading = false;
+                  }
+                } else {
+                  if(data.data.statusCode ===  401){
+                    console.log('got a 401 on course');
+                    Get.getTokens('umscheduleofclasses')
+                      .then(function(data) {
+                        $log.info('getting umsc token');
+                        $scope.clickGetCourses();
+                      });
+
+                  }
                 }
               });
 
           });
         } else {
           //ESB returned something other than a 200
-          $scope.catastrophicError = true;
+          if(data.data.statusCode ===  401){
+            console.log('got a 401 on courses');
+            Get.getTokens('instructors')
+              .then(function(data) {
+                $log.info('getting iinstructors token');
+                $scope.clickGetCourses();
+              });
+          }
+          //
+          // $scope.catastrophicError = true;
           $scope.loading = false;
-          $log.warn(data);
-          $log.warn(data.data.httpCode + ', ' + data.data.httpMessage + ', ' + data.data.moreInformation);
+          // $log.warn(data);
+          // $log.warn(data.data.httpCode + ', ' + data.data.httpMessage + ', ' + data.data.moreInformation);
         }
       });
   };
