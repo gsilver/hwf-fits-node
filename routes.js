@@ -25,10 +25,9 @@ module.exports = function (app) {
         return console.error('Failed: %s', error.message);
       }
       else {
-
         var bodyObj = JSON.parse(body);
-        res.send('ok');
         app.locals[req.params.scope + '_token'] = bodyObj.access_token;
+        res.send('ok');
       }
     });
   });

@@ -69,6 +69,10 @@
         <div>
           <p>Look up a user's teaching assignments. If all looks well, download a <strong>.ics</strong> file to import into you calendar</p>
         </div>
+        <div class="alert alert-danger" ng-show="catastrophicError">
+          There was an error, quite possibly this user is locked and unavailable in MPath QA.
+        </div>
+
         <div class="alert alert-danger" role="alert" ng-show="courseFailures.length">
           <strong> Following courses failed to be looked up:</strong>
           <ol>
@@ -85,10 +89,7 @@
     <div class="alert alert-info" ng-show="classListSchedule && !classListSchedule.length && !loading && !catastrophicError">
       No courses found for {{instructorInput}}
     </div>
-    <div class="alert alert-danger" ng-show="catastrophicError">
-      There was an error, quite possibly this user is locked and unavailable in MPath QA.
-    </div>
-    <table class="table table-hover" ng-show="classListSchedule.length">
+      <table class="table table-hover" ng-show="classListSchedule.length">
       <thead>
         <tr>
           <th scope="col">
@@ -106,7 +107,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="class in classListSchedule">
+        <tr ng-repeat="class in classListSchedule track by $index">
           <td>
             {{class.SubjectCode}} {{class.CatalogNumber}}
             <small ng-show="class.CourseDescr">

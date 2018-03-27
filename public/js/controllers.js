@@ -33,13 +33,15 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
   //get the tokens on page load
   // NOTE: getting tokens only when request for courses or course fail
   // with a 401
-  // Get.getTokens('instructors')
-  //   .then(function(data) {});
-  // Get.getTokens('umscheduleofclasses')
-  //   .then(function(data) {});
+  Get.getTokens('instructors')
+    .then(function(data) {});
+  Get.getTokens('umscheduleofclasses')
+    .then(function(data) {});
 
   //triggered with button click
   $scope.clickGetCourses = function() {
+    //reset courses list
+    $scope.courses = [];
     $log.info('getting courses');
     $scope.catastrophicError = false;
     //start spinner
@@ -50,7 +52,6 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     $scope.classListSchedule = [];
     Get.getCourses(termId, userId)
       .then(function(data) {
-        $log.warn(data.data.statusCode);
         if (data.data.statusCode === 200) {
           var parsedBody = JSON.parse(data.data.body);
           if (parsedBody.getInstrClassListResponse.InstructedClass) {
@@ -66,50 +67,57 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
             $scope.courses = [];
             $scope.loading = false;
           }
+
           // loop over courses array and call another API
           // to get course details
           _.each($scope.courses, function(course, i) {
             Get.getCourse(termId, course.ClassNumber)
-              .then(function(data) {
-                if(data.data.statusCode ===200){
-                  var parsedBody = JSON.parse(data.data.body);
+              .then(function(coursedata) {
+                if (coursedata.data.statusCode === 200) {
+                  var parsedBody = JSON.parse(coursedata.data.body);
                   if (parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting.length === undefined) {
                     // ESB has returned an object Meeting as there is only one, so turn into an array
                     parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting = [].concat(parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting);
                   }
                   //push this course object to the array
                   $scope.classListSchedule.push(parsedBody.getSOCSectionListByNbrResponse.ClassOffered);
-                  if (i + 1 === $scope.courses.length) {
-                    //done retrieving courses, stop spinner
-                    $scope.loading = false;
-                  }
                 } else {
-                  if(data.data.statusCode ===  401){
+                if (coursedata.data.statusCode === 401) {
                     console.log('got a 401 on course');
                     Get.getTokens('umscheduleofclasses')
                       .then(function(data) {
                         $log.info('getting umsc token');
+                        $scope.courses = [];
+                        $scope.classListSchedule = [];
                         $scope.clickGetCourses();
                       });
 
                   }
                 }
               });
+              if (i + 1 === $scope.courses.length) {
+                //done retrieving courses, stop spinner
+                $scope.loading = false;
+              }
+
 
           });
         } else {
           //ESB returned something other than a 200
-          if(data.data.statusCode ===  401){
+          if (data.data.statusCode === 401) {
             console.log('got a 401 on courses');
             Get.getTokens('instructors')
               .then(function(data) {
-                $log.info('getting iinstructors token');
+                $log.info('getting instructors token');
                 $scope.clickGetCourses();
               });
+          } else {
+            $scope.loading = false;
+            $scope.catastrophicError = true;
           }
           //
           // $scope.catastrophicError = true;
-          $scope.loading = false;
+          //$scope.loading = false;
           // $log.warn(data);
           // $log.warn(data.data.httpCode + ', ' + data.data.httpMessage + ', ' + data.data.moreInformation);
         }
