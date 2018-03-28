@@ -46,7 +46,6 @@ module.exports = function (app) {
       request(options, function (error, response, body) {
         if (error | response.statusCode === 401) {
         }
-        console.log(body);
         res.send({'statusCode':response.statusCode, 'body':body});
       });
   });

@@ -123,10 +123,17 @@
           </td>
           <td>
             <div ng-repeat="meeting in class.Meeting" class="row">
-              <div class="col-md-6">
-                {{meeting.Days}} - {{meeting.Times}}
+              <div class="col-md-1">
+                {{meeting.Days}}
               </div>
-              <div class="col-md-6">
+              <div class="col-md-4">
+                {{meeting.Times}}
+              </div>
+              <div class="col-md-3">
+                <span ng-if="meeting.StartDate === meeting.EndDate" style="white-space: nowrap">{{meeting.StartDate}}</span>
+                <span ng-if="meeting.StartDate !== meeting.EndDate"  style="white-space: nowrap">{{meeting.StartDate}} - {{meeting.EndDate}}</span>
+              </div>
+              <div class="col-md-3">
                 {{meeting.Location}}
                 <!-- keep this - see if we can use it later -->
                 <!-- <a href="https://www.google.com/maps/search/{{class.Meeting.Location[1] | titlecase}}, +University+of+Michigan, +Ann Arbor" target="_blank">{{class.Meeting.Location[0]}} {{class.Meeting.Location[1] | titlecase}}</a> -->

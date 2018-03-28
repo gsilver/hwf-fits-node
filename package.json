@@ -1,5 +1,5 @@
 {
-  "name": "node-todo",
+  "name": "node-schedule-getter",
   "version": "0.0.1",
   "description": "Node/Angular app using the UM ESB to retrieve public chedule information on instructors and transform it to .ics for import into Google Calendar",
   "main": "server.js",

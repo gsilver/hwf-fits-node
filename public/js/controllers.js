@@ -67,11 +67,9 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
             $scope.courses = [];
             $scope.loading = false;
           }
-          //console.log($scope.courses);
           // loop over courses array and call another API
           // to get course details
           _.each($scope.courses, function(course, i) {
-            //console.log($scope.courses);
             Get.getCourse(termId, course.ClassNumber)
               .then(function(coursedata) {
                 var parsedBody = coursedata.data;
