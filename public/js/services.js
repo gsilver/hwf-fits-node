@@ -1,5 +1,11 @@
 scheduleApp.factory('Get', function($http, $rootScope, $log) {
   return {
+    getTerms: function() {
+      $log.info('factory request for terms');
+      return $http.get('/api/terms/').then(function(data) {
+        return data;
+      });
+    },
     getCourses: function(termId, userId) {
       $log.info('factory request for courses for term ' + termId + ' for user ' + userId);
       return $http.get('/api/courses/' + termId + '/' + userId).then(function(data) {

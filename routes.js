@@ -49,6 +49,25 @@ module.exports = function (app) {
         res.send({'statusCode':response.statusCode, 'body':body});
       });
   });
+  app.get('/api/terms', function (req, res) {
+      var options = {
+        method: 'GET',
+        url: process.env.APISERVER  + '/um/Curriculum/SOC/Terms',
+        headers:  {
+          accept: 'application/json',
+          authorization: 'Bearer ' + app.locals.umscheduleofclasses_token,
+          'x-ibm-client-id': process.env.CLIENTID
+          }
+        };
+      request(options, function (error, response, body) {
+        if (error | response.statusCode === 401) {
+        }
+        res.send(JSON.parse(body));
+      });
+  });
+
+
+
 
 
   app.get('/data/location/buildings.json', function (req, res) {

@@ -8,35 +8,24 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
   Get.getBuildings('data/location/buildings.json').then(function(buildingData) {
     $scope.buildings = buildingData.data;
   });
-  // this will need to come from ESB on page load
-  $scope.terms = [{
-      id: '2170',
-      name: 'Winter 2018'
-    },
-    {
-      id: '2180',
-      name: 'Spring 2018'
-    },
-    {
-      id: '2190',
-      name: 'Summer 2018'
-    },
-    {
-      id: '2120',
-      name: 'Spring-Summer 2018'
-    },
-  ];
-  //set the selected term to the first item in array
-  //TODO - may need to do sort the array by term id when we get it from ESB
-  $scope.termInput = $scope.terms[0];
-
   //get the tokens on page load
   // NOTE: getting tokens only when request for courses or course fail
   // with a 401
-  // Get.getTokens('instructors')
-  //   .then(function(data) {});
-  // Get.getTokens('umscheduleofclasses')
-  //   .then(function(data) {});
+  Get.getTokens('instructors')
+    .then(function(data) {});
+  Get.getTokens('umscheduleofclasses')
+    .then(function(data) {
+      Get.getTerms().then(function(terms){
+        $scope.terms=[];
+        _.each(terms.data.getSOCTermsResponse.Term, function(term){
+          $scope.terms.push({'id': term.TermCode, 'name':term.TermDescr});
+        });
+        $scope.terms = _.sortBy($scope.terms, 'id');
+        $scope.termInput = $scope.terms[0];
+      });
+    });
+
+
 
   //triggered with button click
   $scope.clickGetCourses = function() {
