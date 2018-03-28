@@ -15,7 +15,9 @@ Record your app's ID and SECRET, add a `.env` file to the root with the followin
 ```
 CLIENTID=the client app id
 CLIENTSECRET=the client app secret
+APISERVER=the server with the endpoints
 DEBUGLEVEL=5
+
 ```
 Start the server on port `8080` with
 

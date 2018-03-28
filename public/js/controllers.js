@@ -33,10 +33,10 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
   //get the tokens on page load
   // NOTE: getting tokens only when request for courses or course fail
   // with a 401
-  Get.getTokens('instructors')
-    .then(function(data) {});
-  Get.getTokens('umscheduleofclasses')
-    .then(function(data) {});
+  // Get.getTokens('instructors')
+  //   .then(function(data) {});
+  // Get.getTokens('umscheduleofclasses')
+  //   .then(function(data) {});
 
   //triggered with button click
   $scope.clickGetCourses = function() {
@@ -67,40 +67,25 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
             $scope.courses = [];
             $scope.loading = false;
           }
-
+          //console.log($scope.courses);
           // loop over courses array and call another API
           // to get course details
           _.each($scope.courses, function(course, i) {
+            //console.log($scope.courses);
             Get.getCourse(termId, course.ClassNumber)
               .then(function(coursedata) {
-                if (coursedata.data.statusCode === 200) {
-                  var parsedBody = JSON.parse(coursedata.data.body);
-                  if (parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting.length === undefined) {
-                    // ESB has returned an object Meeting as there is only one, so turn into an array
-                    parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting = [].concat(parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting);
-                  }
-                  //push this course object to the array
-                  $scope.classListSchedule.push(parsedBody.getSOCSectionListByNbrResponse.ClassOffered);
-                } else {
-                if (coursedata.data.statusCode === 401) {
-                    console.log('got a 401 on course');
-                    Get.getTokens('umscheduleofclasses')
-                      .then(function(data) {
-                        $log.info('getting umsc token');
-                        $scope.courses = [];
-                        $scope.classListSchedule = [];
-                        $scope.clickGetCourses();
-                      });
-
-                  }
+                var parsedBody = coursedata.data;
+                if (parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting.length === undefined) {
+                  // ESB has returned an object Meeting as there is only one, so turn into an array
+                  parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting = [].concat(parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting);
                 }
+                //push this course object to the array
+                $scope.classListSchedule.push(parsedBody.getSOCSectionListByNbrResponse.ClassOffered);
               });
               if (i + 1 === $scope.courses.length) {
                 //done retrieving courses, stop spinner
                 $scope.loading = false;
               }
-
-
           });
         } else {
           //ESB returned something other than a 200
@@ -108,18 +93,16 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
             console.log('got a 401 on courses');
             Get.getTokens('instructors')
               .then(function(data) {
-                $log.info('getting instructors token');
-                $scope.clickGetCourses();
+                Get.getTokens('umscheduleofclasses')
+                  .then(function(data) {
+                    //restart the whole request for classes, each indicidual class
+                    $scope.clickGetCourses();
+                });
               });
           } else {
             $scope.loading = false;
             $scope.catastrophicError = true;
           }
-          //
-          // $scope.catastrophicError = true;
-          //$scope.loading = false;
-          // $log.warn(data);
-          // $log.warn(data.data.httpCode + ', ' + data.data.httpMessage + ', ' + data.data.moreInformation);
         }
       });
   };
@@ -136,11 +119,13 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
       buildingArr = [buildingArr[0], buildingObj.Name];
     }
     // returned the initial string with the
-    // second term now the building full name (sometimes)
+    // second term now the building full name or the original
+    // abbreviation if no matches found in building list
     return buildingArr.join(' ');
   };
 
 
+  // download handler
   var downloadICS = function(iCal) {
     iCal = "data:text/calendar;charset=utf-8," + iCal;
     var link = document.createElement("a");
@@ -153,11 +138,11 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     }, 800);
   };
 
-
-  // need to manipulate the array to produce as many objects
-  // as Meeting objects all of the array objects contain
-  // this is so that the conversion to ICS is more straigthforward
+  // click handler for "download ICS" button
   $scope.prepareICS = function(instructorInput) {
+    // need to manipulate the array to produce as many objects
+    // as Meeting objects all of the array objects contain
+    // this is so that the conversion to ICS is more straigthforward
     $scope.preparedEventList = [];
     _.each($scope.classListSchedule, function(course, courseindex) {
       _.each(course.Meeting, function(meeting, i) {
@@ -167,9 +152,10 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
       });
     });
 
-
-    //initialie the iCal
+    // get the envent length (so that when we loop
+    // though the array we know when it is done and we can trigger the download)
     var arrayLen = $scope.preparedEventList.length;
+    //initialie the iCal
     var iCal = 'BEGIN:VCALENDAR\n' +
       'VERSION:2.0\n' +
       'PRODID:-//CLASS//CALENDAR//GENERATOR//UMICH//EDU\n';
@@ -209,7 +195,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
         'LOCATION:' + building + '\n' +
         'END:VEVENT\n';
       if (i + 1 === arrayLen) {
-        // last array item, close and call download function
+        // last array item, close ICS and call download function
         iCal = iCal + 'END:VCALENDAR';
         downloadICS(iCal);
       }
