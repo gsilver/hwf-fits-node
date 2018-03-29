@@ -77,7 +77,7 @@
         </div>
 
         <div class="alert alert-danger" ng-show="catastrophicError.length">
-          There was an error looking up <strong ng-repeat="instructor in catastrophicError">{{instructor}} <span ng-if="!$last">, </span></strong>, quite possibly this user/users is locked and unavailable in MPath QA.
+          There was an error looking up <strong ng-repeat="instructor in catastrophicError">{{instructor}}<span ng-if="!$last">, </span></strong>, quite possibly this user/users is locked and unavailable in MPath QA.
         </div>
         <div class="alert alert-info" ng-show="instructorsNoCourses.length">
           No courses found for <strong ng-repeat="instructor in instructorsNoCourses">{{instructor}} <span ng-if="!$last">, </span></strong> for {{termInput.name}}
@@ -102,6 +102,10 @@
             Title
           </th>
           <th scope="col">
+            Instructor
+          </th>
+
+          <th scope="col">
             Section
           </th>
           <th scope="col">
@@ -115,11 +119,14 @@
       <tbody>
         <tr ng-repeat="class in classListSchedule | orderBy:'uniqname'">
           <td>
-            {{class.SubjectCode}} {{class.CatalogNumber}} ({{class.uniqname}})
+            {{class.SubjectCode}} {{class.CatalogNumber}}
             <small ng-show="class.CourseDescr">
               <br>
               {{class.CourseDescr}}
             </small>
+          </td>
+          <td>
+             {{class.uniqname}}
           </td>
           <td>
             {{class.SectionNumber}}
