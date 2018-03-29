@@ -25,6 +25,17 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
       });
     });
 
+$scope.instructorsNoCourses=[];
+$scope.catastrophicError=[];
+$scope.userListForICS=[];
+
+$scope.clickGetCoursesMult = function() {
+  var userlist = $scope.instructorInputMult.split('\n');
+  _.each(userlist, function (user){
+    $scope.instructorInput = user;
+    $scope.clickGetCourses($scope.instructorInput);
+  });
+};
 
 
   //triggered with button click
@@ -32,7 +43,6 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     //reset courses list
     $scope.courses = [];
     $log.info('getting courses');
-    $scope.catastrophicError = false;
     //start spinner
     $scope.loading = true;
     var termId = $scope.termInput.id;
@@ -47,12 +57,17 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
             if ($.isArray(parsedBody.getInstrClassListResponse.InstructedClass)) {
               // ESB returns an array when multiple courses
               $scope.courses = parsedBody.getInstrClassListResponse.InstructedClass;
+              $scope.userListForICS.push(userId);
+
             } else {
               // ESB returns an object with one course - turn it into an array
               $scope.courses = [].concat(parsedBody.getInstrClassListResponse.InstructedClass);
+              $scope.userListForICS.push(userId);
+
             }
           } else {
             // ESB has returned nothing
+            $scope.instructorsNoCourses.push(userId);
             $scope.courses = [];
             $scope.loading = false;
           }
@@ -64,9 +79,11 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
                 var parsedBody = coursedata.data;
                 if (parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting.length === undefined) {
                   // ESB has returned an object Meeting as there is only one, so turn into an array
+                  parsedBody.getSOCSectionListByNbrResponse.ClassOffered.uniqname = userId;
                   parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting = [].concat(parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting);
                 }
                 //push this course object to the array
+                parsedBody.getSOCSectionListByNbrResponse.ClassOffered.uniqname = userId;
                 $scope.classListSchedule.push(parsedBody.getSOCSectionListByNbrResponse.ClassOffered);
               });
               if (i + 1 === $scope.courses.length) {
@@ -88,7 +105,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
               });
           } else {
             $scope.loading = false;
-            $scope.catastrophicError = true;
+            $scope.catastrophicError.push($scope.instructorInput);
           }
         }
       });
@@ -118,7 +135,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     var link = document.createElement("a");
     link.setAttribute("href", encodeURI(iCal));
     // the filename will need to be different for multiples
-    link.setAttribute("download", $scope.instructorInput + '.ics');
+    link.setAttribute("download", $scope.userListForICS.join('-') + '.ics');
     document.body.appendChild(link);
     setTimeout(function() {
       link.click();
@@ -171,13 +188,13 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
       // assemble this event from oject values
       iCal = iCal +
         'BEGIN:VEVENT\n' +
-        'SUMMARY:' + $scope.instructorInput + ' - ' + course.SubjectCode + ' ' + course.CatalogNumber + ' ' + course.SectionNumber + ' Meeting: ' + course.Meeting.MeetingNumber + '\n' +
+        'SUMMARY:' + course.uniqname + ' - ' + course.SubjectCode + ' ' + course.CatalogNumber + ' ' + course.SectionNumber + ' Meeting: ' + course.Meeting.MeetingNumber + '\n' +
         'TZID:US-Eastern\n' +
         'DTSTART:' + moment(course.Meeting.StartDate, 'MM/DD/YYYY').format('YYYYMMDDT') + timeStart + '\n' +
         'DTEND:' + moment(course.Meeting.StartDate, 'MM/DD/YYYY').format('YYYYMMDDT') + timeEnd + '\n' +
         'DTSTAMP:' + moment().format('YYYYMMDDT000000') + 'Z\n' +
         'RRULE:FREQ=WEEKLY;UNTIL=' + moment(course.Meeting.EndDate, 'MM/DD/YYYY').format('YYYYMMDDT000000') + 'Z;BYDAY=' + days.join() + '\n' +
-        'UID:' + moment().format('x') + i + '-' + $scope.instructorInput + '@class-calendar-generator.umich.edu\n' +
+        'UID:' + moment().format('x') + i + '-' + course.uniqname + '@class-calendar-generator.umich.edu\n' +
         'DESCRIPTION:' + courseTopic + ' ' + course.CourseDescr + '\n' +
         'LOCATION:' + building + '\n' +
         'END:VEVENT\n';

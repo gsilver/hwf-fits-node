@@ -46,7 +46,7 @@
 
 <body ng-app="scheduleApp">
   <div class="container" ng-controller="mainController">
-    <h1>FITS <small>(Faculty Istructional Teaching  Scheduler)</small></h1>
+    <h1>FITS <small>(Faculty Instructional Teaching Scheduler)</small></h1>
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
@@ -55,24 +55,33 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="instructor">Instructor</label>
+          <!-- <label for="instructor">Instructor</label> -->
+          <label for="instructorMult">Instructor list</label>
           <div class="input-group">
-            <input type="text" ng-model="instructorInput" class="form-control" id="instructor" aria-describedby="instructorDescription" placeholder="Enter last name">
+            <!-- <input type="text" ng-model="instructorInput" class="form-control" id="instructor" aria-describedby="instructorDescription" placeholder="Enter uniqname"> -->
+            <textarea rows="10" ng-model="instructorInputMult" class="form-control" id="instructorMult" aria-describedby="instructorDescription" placeholder="Enter list of uniqnames, one per line"></textarea>
             <div class="input-group-addon"><i class="glyphicon glyphicon-user"></i></div>
           </div>
           <small id="instructorDescription" class="form-text text-muted">Test users: eickmeya, oliviaor, adelab, mfarron, seeleya, lucyloc</small>
         </div>
         <div class="alert alert-danger" ng-show="lookUpPersonError && instructorInput">{{instructorInput}} does not exist</div>
-        <button class="btn btn-primary" ng-disabled="loading" ng-click="clickGetCourses(instructorInput)">Lookup {{instructorInput}} <i ng-show="loading" class="glyphicon glyphicon-refresh glyphicon-spin"></i></button> <span ng-show="loading"> Working hard!</span>
+        <button class="btn btn-primary" ng-disabled="loading" ng-click="clickGetCoursesMult(instructorInputMult)">Lookup list
+           <i ng-show="loading" class="glyphicon glyphicon-refresh glyphicon-spin"></i></button>
+            <span ng-show="loading"> Working hard!</span>
+
+        <!-- <button class="btn btn-primary" ng-disabled="loading" ng-click="clickGetCourses(instructorInput)">Lookup {{instructorInput}} <i ng-show="loading" class="glyphicon glyphicon-refresh glyphicon-spin"></i></button> <span ng-show="loading"> Working hard!</span> -->
       </div>
       <div class="col-md-6">
         <div>
           <p>Look up a user's teaching assignments. If all looks well, download a <strong>.ics</strong> file to import into you calendar</p>
         </div>
-        <div class="alert alert-danger" ng-show="catastrophicError">
-          There was an error, quite possibly this user is locked and unavailable in MPath QA.
-        </div>
 
+        <div class="alert alert-danger" ng-show="catastrophicError.length">
+          There was an error looking up <strong ng-repeat="instructor in catastrophicError">{{instructor}} <span ng-if="!$last">, </span></strong>, quite possibly this user/users is locked and unavailable in MPath QA.
+        </div>
+        <div class="alert alert-info" ng-show="instructorsNoCourses.length">
+          No courses found for <strong ng-repeat="instructor in instructorsNoCourses">{{instructor}} <span ng-if="!$last">, </span></strong> for {{termInput.name}}
+        </div>
         <div class="alert alert-danger" role="alert" ng-show="courseFailures.length">
           <strong> Following courses failed to be looked up:</strong>
           <ol>
@@ -86,9 +95,6 @@
       </div>
     </div>
     <br><br>
-    <div class="alert alert-info" ng-show="classListSchedule && !classListSchedule.length && !loading && !catastrophicError">
-      No courses found for {{instructorInput}} for {{termInput.name}}
-    </div>
       <table class="table table-hover" ng-show="classListSchedule.length">
       <thead>
         <tr>
@@ -107,9 +113,9 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="class in classListSchedule track by $index">
+        <tr ng-repeat="class in classListSchedule | orderBy:'uniqname'">
           <td>
-            {{class.SubjectCode}} {{class.CatalogNumber}}
+            {{class.SubjectCode}} {{class.CatalogNumber}} ({{class.uniqname}})
             <small ng-show="class.CourseDescr">
               <br>
               {{class.CourseDescr}}
