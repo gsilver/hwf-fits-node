@@ -91,11 +91,12 @@
           </ol>
 
         </div>
-
       </div>
     </div>
     <br><br>
-      <p ng-show="classListSchedule.length"><input type="checkbox" ng-model="filterActive" id="primaryFilter"> <label for="primaryFilter">Show only Primary Instructor roles</label></p>
+      <div ng-show="classListSchedule.length"  ng-class="{'checkbox alert alert-info':filterActive,'checkboxalert alert-default':!filterActive }" style="padding:5px">
+          <label style="padding:5px 30px" for="primaryFilter"><input type="checkbox" ng-model="filterActive" id="primaryFilter"> Show only Primary Instructor roles</label>
+      </div>
       <table class="table table-hover" ng-show="classListSchedule.length">
       <thead>
         <tr>
