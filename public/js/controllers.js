@@ -40,6 +40,7 @@ $scope.clickGetCoursesMult = function() {
 
   //triggered with button click
   $scope.clickGetCourses = function() {
+    $scope.filterActive=null;
     //reset courses list
     $scope.courses = [];
     $log.info('getting courses');
@@ -63,7 +64,6 @@ $scope.clickGetCoursesMult = function() {
               // ESB returns an object with one course - turn it into an array
               $scope.courses = [].concat(parsedBody.getInstrClassListResponse.InstructedClass);
               $scope.userListForICS.push(userId);
-
             }
           } else {
             // ESB has returned nothing
@@ -76,6 +76,7 @@ $scope.clickGetCoursesMult = function() {
           _.each($scope.courses, function(course, i) {
             Get.getCourse(termId, course.ClassNumber)
               .then(function(coursedata) {
+
                 var parsedBody = coursedata.data;
                 if (parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting.length === undefined) {
                   // ESB has returned an object Meeting as there is only one, so turn into an array
@@ -84,8 +85,10 @@ $scope.clickGetCoursesMult = function() {
                 }
                 //push this course object to the array
                 parsedBody.getSOCSectionListByNbrResponse.ClassOffered.uniqname = userId;
+                parsedBody.getSOCSectionListByNbrResponse.ClassOffered.instructorRole = course.InstructorRole;
                 $scope.classListSchedule.push(parsedBody.getSOCSectionListByNbrResponse.ClassOffered);
               });
+
               if (i + 1 === $scope.courses.length) {
                 //done retrieving courses, stop spinner
                 $scope.loading = false;
@@ -94,7 +97,7 @@ $scope.clickGetCoursesMult = function() {
         } else {
           //ESB returned something other than a 200
           if (data.data.statusCode === 401) {
-            console.log('got a 401 on courses');
+            $log.info('got a 401 on courses');
             Get.getTokens('instructors')
               .then(function(data) {
                 Get.getTokens('umscheduleofclasses')
@@ -149,13 +152,22 @@ $scope.clickGetCoursesMult = function() {
     // this is so that the conversion to ICS is more straigthforward
     $scope.preparedEventList = [];
     _.each($scope.classListSchedule, function(course, courseindex) {
-      _.each(course.Meeting, function(meeting, i) {
-        var newCourse = $.extend(true, {}, course);
-        newCourse.Meeting = meeting;
-        $scope.preparedEventList.push(newCourse);
-      });
-    });
 
+      if(course.instructorRole ==='Primary Instructor' && $scope.filterActive){
+        _.each(course.Meeting, function(meeting, i) {
+          var newCourse = $.extend(true, {}, course);
+          newCourse.Meeting = meeting;
+          $scope.preparedEventList.push(newCourse);
+        });
+      }
+      if(!$scope.filterActive){
+        _.each(course.Meeting, function(meeting, i) {
+          var newCourse = $.extend(true, {}, course);
+          newCourse.Meeting = meeting;
+          $scope.preparedEventList.push(newCourse);
+        });
+      }
+    });
     // get the envent length (so that when we loop
     // though the array we know when it is done and we can trigger the download)
     var arrayLen = $scope.preparedEventList.length;
@@ -205,4 +217,24 @@ $scope.clickGetCoursesMult = function() {
       }
     });
   };
+
+
+    $scope.filterActive = false;
+      $scope.filter = function(entry) {
+          if($scope.filterActive) {
+                return (entry.instructorRole === 'Primary Instructor') ? true: false;
+          }
+          return true;
+      };
+
+      $scope.uidFilter = function() {
+          if ($scope.uid != 0){
+              return true;
+             }
+          };
+   $scope.clearFilter = function() {
+      $scope.filter = {};
+    };
+
+
 }]);

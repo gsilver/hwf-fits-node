@@ -62,7 +62,7 @@
             <textarea rows="10" ng-model="instructorInputMult" class="form-control" id="instructorMult" aria-describedby="instructorDescription" placeholder="Enter list of uniqnames, one per line"></textarea>
             <div class="input-group-addon"><i class="glyphicon glyphicon-user"></i></div>
           </div>
-          <small id="instructorDescription" class="form-text text-muted">Test users: eickmeya, oliviaor, adelab, mfarron, seeleya, lucyloc</small>
+          <small id="instructorDescription" class="form-text text-muted">Test users: eickmeya, oliviaor, lmakman, adelab, mfarron, seeleya, lucyloc</small>
         </div>
         <div class="alert alert-danger" ng-show="lookUpPersonError && instructorInput">{{instructorInput}} does not exist</div>
         <button class="btn btn-primary" ng-disabled="loading" ng-click="clickGetCoursesMult(instructorInputMult)">Lookup list
@@ -95,6 +95,7 @@
       </div>
     </div>
     <br><br>
+      <p ng-show="classListSchedule.length"><input type="checkbox" ng-model="filterActive" id="primaryFilter"> <label for="primaryFilter">Show only Primary Instructor roles</label></p>
       <table class="table table-hover" ng-show="classListSchedule.length">
       <thead>
         <tr>
@@ -117,7 +118,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="class in classListSchedule | orderBy:'uniqname'">
+        <tr ng-repeat="class in classListSchedule | orderBy:'uniqname' |  filter:filter">
           <td>
             {{class.SubjectCode}} {{class.CatalogNumber}}
             <small ng-show="class.CourseDescr">
@@ -126,7 +127,8 @@
             </small>
           </td>
           <td>
-             {{class.uniqname}}
+            {{class.uniqname}} <br>             <!-- {{class.Instructor.InstructorName.split(',').join(', ') }} <br><small><a href="mailto:{{class.Instructor.Uniqname | lowercase}}@umich.edu">{{class.Instructor.Uniqname | lowercase}}@umich.edu</a></small><br> -->
+             <small>{{class.instructorRole}}</small>
           </td>
           <td>
             {{class.SectionNumber}}
@@ -146,8 +148,9 @@
                 <span ng-if="meeting.StartDate === meeting.EndDate" style="white-space: nowrap">{{meeting.StartDate}}</span>
                 <span ng-if="meeting.StartDate !== meeting.EndDate"  style="white-space: nowrap">{{meeting.StartDate}} - {{meeting.EndDate}}</span>
               </div>
-              <div class="col-md-3">
-                {{meeting.Location}}
+              <div class="col-md-3" style="text-align:right">
+                {{meeting.Location}} <br>
+                <small>{{meeting.Instructors}}</small>
                 <!-- keep this - see if we can use it later -->
                 <!-- <a href="https://www.google.com/maps/search/{{class.Meeting.Location[1] | titlecase}}, +University+of+Michigan, +Ann Arbor" target="_blank">{{class.Meeting.Location[0]}} {{class.Meeting.Location[1] | titlecase}}</a> -->
               </div>
@@ -160,7 +163,7 @@
     <div ng-show="classListSchedule.length">
       <button type="button" class="btn btn-primary" ng-click="prepareICS()">
         This is fine, download ICS
-      </button> <small>(for importing into Google calendar)</small>
+      </button> <small>(for importing into Google calendar <strong ng-show="filterActive"> -  only the Primary Instructors</strong>)</small>
     </div>
 
     <br>
