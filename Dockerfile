@@ -6,7 +6,7 @@ COPY . /usr/src/app
 # Install app dependencies
 RUN npm install
 # Bundle app source
-EXPOSE 80
+EXPOSE 8090
 #CMD /bin/bash
 #run start up from shell script
 COPY run.sh usr/local/app/

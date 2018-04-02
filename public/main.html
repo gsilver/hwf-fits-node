@@ -94,8 +94,10 @@
       </div>
     </div>
     <br><br>
-      <div ng-show="classListSchedule.length"  ng-class="{'checkbox alert alert-info':filterActive,'checkboxalert alert-default':!filterActive }" style="padding:5px">
+      <div ng-show="classListSchedule.length"  ng-class="filterActive? 'checkbox alert alert-success':'checkbox alert  alert-info'" style="padding:5px">
+      <!-- <div ng-show="classListSchedule.length"   ng-class="{'checkbox alert  alert-info':filterActive,'checkbox alert alert-warn':!filterActive }" style="padding:5px"> -->
           <label style="padding:5px 30px" for="primaryFilter"><input type="checkbox" ng-model="filterActive" id="primaryFilter"> Show only Primary Instructor roles</label>
+          <strong ng-show="filterActive">(now showing only Primary Instructor roles)</strong><strong ng-show="!filterActive">(now showing all roles)</strong>
       </div>
       <table class="table table-hover" ng-show="classListSchedule.length">
       <thead>

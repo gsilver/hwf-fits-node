@@ -28,7 +28,6 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
 $scope.instructorsNoCourses=[];
 $scope.catastrophicError=[];
 $scope.userListForICS=[];
-
 $scope.clickGetCoursesMult = function() {
   var userlist = $scope.instructorInputMult.split('\n');
   _.each(userlist, function (user){
