@@ -1,7 +1,7 @@
 // set up ======================================================================
 var express = require('express');
 var app = express();
-var port = process.env.PORT || 8080;
+var port = 80;
 var morgan = require('morgan');
 
 app.use(express.static('./public'));
