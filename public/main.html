@@ -35,6 +35,13 @@
     transform: rotate(359deg);
   }
 }
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+    display: none !important;
+}
+.bold {
+  font-weight:bold;
+}
 </style>
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -44,7 +51,7 @@
     <![endif]-->
 </head>
 
-<body ng-app="scheduleApp">
+<body ng-app="scheduleApp" ng-cloak>
   <div class="container" ng-controller="mainController">
     <h1>FITS <small>(Faculty Instructional Teaching Scheduler)</small></h1>
     <div class="row">
@@ -66,10 +73,9 @@
         </div>
         <div class="alert alert-danger" ng-show="lookUpPersonError && instructorInput">{{instructorInput}} does not exist</div>
         <button class="btn btn-primary" ng-disabled="loading" ng-click="clickGetCoursesMult(instructorInputMult)">Lookup list
-           <i ng-show="loading" class="glyphicon glyphicon-refresh glyphicon-spin"></i></button>
-            <span ng-show="loading"> Working hard!</span>
-
-        <!-- <button class="btn btn-primary" ng-disabled="loading" ng-click="clickGetCourses(instructorInput)">Lookup {{instructorInput}} <i ng-show="loading" class="glyphicon glyphicon-refresh glyphicon-spin"></i></button> <span ng-show="loading"> Working hard!</span> -->
+           <i ng-show="loading" class="glyphicon glyphicon-refresh glyphicon-spin"></i>
+        </button>
+        <span ng-show="loading"> Working hard!</span>
       </div>
       <div class="col-md-6">
         <div>
@@ -94,10 +100,14 @@
       </div>
     </div>
     <br><br>
-      <div ng-show="classListSchedule.length"  ng-class="filterActive? 'checkbox alert alert-success':'checkbox alert  alert-info'" style="padding:5px">
+      <div ng-show="classListSchedule.length"  ng-class="filterActive? 'checkbox alert alert-info':'checkbox alert  alert-warn'" style="padding:5px">
       <!-- <div ng-show="classListSchedule.length"   ng-class="{'checkbox alert  alert-info':filterActive,'checkbox alert alert-warn':!filterActive }" style="padding:5px"> -->
-          <label style="padding:5px 30px" for="primaryFilter"><input type="checkbox" ng-model="filterActive" id="primaryFilter"> Show only Primary Instructor roles</label>
-          <strong ng-show="filterActive">(now showing only Primary Instructor roles)</strong><strong ng-show="!filterActive">(now showing all roles)</strong>
+      <!-- style="padding:5px 30px"  -->
+          <label for="primaryFilter"><input type="checkbox" ng-model="filterActive" id="primaryFilter">
+             Show only Primary Instructor roles
+             <strong ng-show="filterActive">(now showing only Primary Instructor roles)</strong><strong ng-show="!filterActive">(now showing all roles)</strong>
+          </label>
+
       </div>
       <table class="table table-hover" ng-show="classListSchedule.length">
       <thead>
@@ -121,7 +131,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="class in classListSchedule | orderBy:'uniqname' |  filter:filter">
+        <tr ng-repeat="class in classListSchedule | orderBy:'uniqname' |  filter:filter"  ng-class="class.uniqname === class.Instructor.Uniqname.toLowerCase() && !filterActive?'info':''">
           <td>
             {{class.SubjectCode}} {{class.CatalogNumber}}
             <small ng-show="class.CourseDescr">
@@ -130,8 +140,8 @@
             </small>
           </td>
           <td>
-            {{class.uniqname}} <br>             <!-- {{class.Instructor.InstructorName.split(',').join(', ') }} <br><small><a href="mailto:{{class.Instructor.Uniqname | lowercase}}@umich.edu">{{class.Instructor.Uniqname | lowercase}}@umich.edu</a></small><br> -->
-             <small>{{class.instructorRole}}</small>
+            {{class.uniqname}}<br>
+             <small ng-class="class.uniqname === class.Instructor.Uniqname.toLowerCase()?'bold':''">{{class.instructorRole}}</small>
           </td>
           <td>
             {{class.SectionNumber}}
@@ -153,9 +163,7 @@
               </div>
               <div class="col-md-3" style="text-align:right">
                 {{meeting.Location}} <br>
-                <small>{{meeting.Instructors}}</small>
-                <!-- keep this - see if we can use it later -->
-                <!-- <a href="https://www.google.com/maps/search/{{class.Meeting.Location[1] | titlecase}}, +University+of+Michigan, +Ann Arbor" target="_blank">{{class.Meeting.Location[0]}} {{class.Meeting.Location[1] | titlecase}}</a> -->
+                <small ng-class="class.uniqname === class.Instructor.Uniqname.toLowerCase()?'bold':''">{{meeting.Instructors}}</small>
               </div>
             </div>
           </td>
