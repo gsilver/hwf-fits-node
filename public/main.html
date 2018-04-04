@@ -82,11 +82,11 @@
           <p>Look up a user's teaching assignments. If all looks well, download a <strong>.ics</strong> file to import into you calendar</p>
         </div>
 
-        <div class="alert alert-danger" ng-show="catastrophicError.length">
+        <div class="alert alert-danger" ng-show="catastrophicError.length && !loading">
           There was an error looking up <strong ng-repeat="instructor in catastrophicError">{{instructor}}<span ng-if="!$last">, </span></strong>, quite possibly this user/users is locked and unavailable in MPath QA.
         </div>
         <div class="alert alert-info" ng-show="instructorsNoCourses.length">
-          No courses found for <strong ng-repeat="instructor in instructorsNoCourses">{{instructor}} <span ng-if="!$last">, </span></strong> for {{termInput.name}}
+          No courses found for <strong ng-repeat="instructor in instructorsNoCourses">{{instructor}}<span ng-if="!$last">, </span></strong> for {{termInput.name}}
         </div>
         <div class="alert alert-danger" role="alert" ng-show="courseFailures.length">
           <strong> Following courses failed to be looked up:</strong>
@@ -100,16 +100,17 @@
       </div>
     </div>
     <br><br>
-      <div ng-show="classListSchedule.length"  ng-class="filterActive? 'checkbox alert alert-info':'checkbox alert  alert-warn'" style="padding:5px">
-      <!-- <div ng-show="classListSchedule.length"   ng-class="{'checkbox alert  alert-info':filterActive,'checkbox alert alert-warn':!filterActive }" style="padding:5px"> -->
-      <!-- style="padding:5px 30px"  -->
+      <div ng-show="classListSchedule.length"  class="checkbox alert alert-info" style="padding:5px">
           <label for="primaryFilter"><input type="checkbox" ng-model="filterActive" id="primaryFilter">
-             Show only Primary Instructor roles
+             Select only Primary Instructor roles
              <strong ng-show="filterActive">(now showing only Primary Instructor roles)</strong><strong ng-show="!filterActive">(now showing all roles)</strong>
           </label>
 
       </div>
-      <table class="table table-hover" ng-show="classListSchedule.length">
+      <div class="alert alert-danger" ng-show="filtered.length === 0 && !loading && filterActive ">
+        No classes where this user or users is the Primary Instructor
+      </div>
+      <table class="table table-hover" ng-show="classListSchedule.length && filtered.length !== 0">
       <thead>
         <tr>
           <th scope="col">
@@ -131,7 +132,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="class in classListSchedule | orderBy:'uniqname' |  filter:filter"  ng-class="class.uniqname === class.Instructor.Uniqname.toLowerCase() && !filterActive?'info':''">
+        <tr ng-repeat="class in classListSchedule | orderBy:'uniqname' |  filter:filter as filtered">
           <td>
             {{class.SubjectCode}} {{class.CatalogNumber}}
             <small ng-show="class.CourseDescr">
@@ -171,7 +172,7 @@
       </tbody>
 
     </table>
-    <div ng-show="classListSchedule.length">
+    <div ng-show="classListSchedule.length && filtered.length !== 0">
       <button type="button" class="btn btn-primary" ng-click="prepareICS()">
         This is fine, download ICS
       </button> <small>(for importing into Google calendar <strong ng-show="filterActive"> -  only the Primary Instructors</strong>)</small>

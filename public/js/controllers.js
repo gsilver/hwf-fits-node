@@ -1,7 +1,5 @@
 //TODO: package with Bower/Grunt
-//TODO: get terms from ESB
 
-// inject the  service factory into our controller
 scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', function($scope, $http, $log, Get) {
   // get buildings array from local file
   // long term get from ESB and cache
@@ -29,9 +27,18 @@ $scope.instructorsNoCourses=[];
 $scope.catastrophicError=[];
 $scope.userListForICS=[];
 $scope.clickGetCoursesMult = function() {
-  var userlist = $scope.instructorInputMult.split('\n');
+  $scope.instructorsNoCourses=[];
+  $scope.catastrophicError=[];
+  $scope.filterActive = false;
+  var userArrayTrimmed = [];
+  //remove whitespace from each user
+  _.each($scope.instructorInputMult.split('\n'), function(user){
+    userArrayTrimmed.push(user.trim());
+  });
+  // remove dupes and falsy values from array
+  var userlist = _.compact(_.uniq(userArrayTrimmed));
   _.each(userlist, function (user){
-    $scope.instructorInput = user;
+    $scope.instructorInput = user.trim();
     $scope.clickGetCourses($scope.instructorInput);
   });
 };
@@ -218,22 +225,12 @@ $scope.clickGetCoursesMult = function() {
   };
 
 
-    $scope.filterActive = false;
-      $scope.filter = function(entry) {
-          if($scope.filterActive) {
-                return (entry.instructorRole === 'Primary Instructor') ? true: false;
-          }
-          return true;
-      };
-
-      $scope.uidFilter = function() {
-          if ($scope.uid != 0){
-              return true;
-             }
-          };
-   $scope.clearFilter = function() {
-      $scope.filter = {};
-    };
-
+  $scope.filterActive = false;
+    $scope.filter = function(entry) {
+      if($scope.filterActive) {
+        return (entry.instructorRole === 'Primary Instructor') ? true: false;
+      }
+      return true;
+  };
 
 }]);
