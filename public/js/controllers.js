@@ -116,7 +116,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
               });
           } else {
             $scope.loading = false;
-            $scope.catastrophicError.push($scope.instructorInput);
+            $scope.catastrophicError.push(userId);
           }
         }
       });
@@ -146,7 +146,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     var link = document.createElement("a");
     link.setAttribute("href", encodeURI(iCal));
     // the filename will need to be different for multiples
-    link.setAttribute("download", $scope.userListForICS.join('-') + '.ics');
+    link.setAttribute("download", _.uniq($scope.userListForICS).join('-') + '.ics');
     document.body.appendChild(link);
     setTimeout(function() {
       link.click();
