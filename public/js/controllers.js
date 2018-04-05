@@ -1,5 +1,5 @@
 //TODO: package with Bower/Grunt
-
+//TODO: use blob to force download for IE
 scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', function($scope, $http, $log, Get) {
   // get buildings array from local file
   // long term get from ESB and cache

@@ -83,12 +83,6 @@
         <div>
           <p>Look up {{instructorInputMult.split('\n').length}} user's teaching assignments. If all looks well, download a <strong>.ics</strong> file to import into you calendar</p>
         </div>
-        <div ng-show="">
-          <p>Looking up:</p>
-          <ul>
-            <li ng-repeat="instructor in instructorInputMult.split('\n') track by $index">{{instructor}}</li>
-          </ul>
-        </div>
         <div class="alert alert-danger" ng-show="catastrophicError.length && !loading">
           There was an error looking up <strong ng-repeat="instructor in catastrophicError">{{instructor}}<span ng-if="!$last">, </span></strong>. <br>Quite possibly locked and unavailable in MPath QA.
         </div>
