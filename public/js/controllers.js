@@ -7,8 +7,6 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     $scope.buildings = buildingData.data;
   });
   //get the tokens on page load
-  // NOTE: getting tokens only when request for courses or course fail
-  // with a 401
   Get.getTokens('instructors')
     .then(function(data) {});
   Get.getTokens('umscheduleofclasses')
@@ -23,26 +21,30 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
       });
     });
 
-$scope.instructorsNoCourses=[];
-$scope.catastrophicError=[];
-$scope.userListForICS=[];
-$scope.clickGetCoursesMult = function() {
   $scope.instructorsNoCourses=[];
   $scope.catastrophicError=[];
-  $scope.filterActive = false;
-  var userArrayTrimmed = [];
-  //remove whitespace from each user
-  _.each($scope.instructorInputMult.split('\n'), function(user){
-    userArrayTrimmed.push(user.trim());
-  });
-  // remove dupes and falsy values from array
-  var userlist = _.compact(_.uniq(userArrayTrimmed));
-  _.each(userlist, function (user){
-    $scope.instructorInput = user.trim();
-    $scope.clickGetCourses($scope.instructorInput);
-  });
-};
-
+  $scope.userListForICS=[];
+  $scope.clickGetCoursesMult = function() {
+    $scope.instructorsNoCourses=[];
+    $scope.catastrophicError=[];
+    $scope.filterActive = false;
+    var userArrayTrimmed = [];
+    //remove whitespace from each user
+    if($scope.instructorInputMult.split('\n').length){
+      $scope.instructorInputMultFail=false;
+      _.each($scope.instructorInputMult.split('\n'), function(user){
+        userArrayTrimmed.push(user.trim());
+      });
+      // remove dupes and falsy values from array
+      var userlist = _.compact(_.uniq(userArrayTrimmed));
+      _.each(userlist, function (user){
+        $scope.instructorInput = user.trim();
+        $scope.clickGetCourses($scope.instructorInput);
+      });
+    } else {
+      $scope.instructorInputMultFail=true;
+    }
+  };
 
   //triggered with button click
   $scope.clickGetCourses = function() {
@@ -109,7 +111,7 @@ $scope.clickGetCoursesMult = function() {
                 Get.getTokens('umscheduleofclasses')
                   .then(function(data) {
                     //restart the whole request for classes, each indicidual class
-                    $scope.clickGetCourses();
+                    $scope.clickGetCoursesMult();
                 });
               });
           } else {
@@ -120,6 +122,7 @@ $scope.clickGetCoursesMult = function() {
       });
   };
 
+  //lookup building based on abbrv used in data (good luck)
   var getBuilding = function(building) {
     //given a string, split it and look for the second term in the building array
     // which is the building abbreviation
@@ -136,7 +139,6 @@ $scope.clickGetCoursesMult = function() {
     // abbreviation if no matches found in building list
     return buildingArr.join(' ');
   };
-
 
   // download handler
   var downloadICS = function(iCal) {
@@ -224,7 +226,7 @@ $scope.clickGetCoursesMult = function() {
     });
   };
 
-
+  //filter all users except Primary Instructor roles
   $scope.filterActive = false;
     $scope.filter = function(entry) {
       if($scope.filterActive) {

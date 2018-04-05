@@ -72,16 +72,23 @@
           <small id="instructorDescription" class="form-text text-muted">Test users: eickmeya, oliviaor, lmakman, adelab, mfarron, seeleya, lucyloc</small>
         </div>
         <div class="alert alert-danger" ng-show="lookUpPersonError && instructorInput">{{instructorInput}} does not exist</div>
-        <button class="btn btn-primary" ng-disabled="loading" ng-click="clickGetCoursesMult(instructorInputMult)">Lookup list
-           <i ng-show="loading" class="glyphicon glyphicon-refresh glyphicon-spin"></i>
+        <button class="btn btn-primary" ng-disabled="loading || !instructorInputMult.split('\n').length" ng-click="clickGetCoursesMult(instructorInputMult)">
+          Lookup list
+          <i ng-show="loading" class="glyphicon glyphicon-refresh glyphicon-spin"></i>
         </button>
         <span ng-show="loading"> Working hard!</span>
+        <span ng-show="instructorInputMultFail">Please supply some uniqnames.</span>
       </div>
       <div class="col-md-6">
         <div>
-          <p>Look up a user's teaching assignments. If all looks well, download a <strong>.ics</strong> file to import into you calendar</p>
+          <p>Look up {{instructorInputMult.split('\n').length}} user's teaching assignments. If all looks well, download a <strong>.ics</strong> file to import into you calendar</p>
         </div>
-
+        <div ng-show="">
+          <p>Looking up:</p>
+          <ul>
+            <li ng-repeat="instructor in instructorInputMult.split('\n') track by $index">{{instructor}}</li>
+          </ul>
+        </div>
         <div class="alert alert-danger" ng-show="catastrophicError.length && !loading">
           There was an error looking up <strong ng-repeat="instructor in catastrophicError">{{instructor}}<span ng-if="!$last">, </span></strong>, quite possibly this user/users is locked and unavailable in MPath QA.
         </div>
@@ -164,7 +171,7 @@
               </div>
               <div class="col-md-3" style="text-align:right">
                 {{meeting.Location}} <br>
-                <small ng-class="class.uniqname === class.Instructor.Uniqname.toLowerCase()?'bold':''">{{meeting.Instructors}}</small>
+                <small ng-class="class.uniqname === class.Instructor.Uniqname.toLowerCase()?'bold':''">{{meeting.Instructors.split(',').join(', ')}}</small>
               </div>
             </div>
           </td>
