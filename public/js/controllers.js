@@ -11,44 +11,47 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     .then(function(data) {});
   Get.getTokens('umscheduleofclasses')
     .then(function(data) {
-      Get.getTerms().then(function(terms){
-        $scope.terms=[];
-        _.each(terms.data.getSOCTermsResponse.Term, function(term){
-          $scope.terms.push({'id': term.TermCode, 'name':term.TermDescr});
+      Get.getTerms().then(function(terms) {
+        $scope.terms = [];
+        _.each(terms.data.getSOCTermsResponse.Term, function(term) {
+          $scope.terms.push({
+            'id': term.TermCode,
+            'name': term.TermDescr
+          });
         });
         $scope.terms = _.sortBy($scope.terms, 'id');
         $scope.termInput = $scope.terms[0];
       });
     });
 
-  $scope.instructorsNoCourses=[];
-  $scope.catastrophicError=[];
-  $scope.userListForICS=[];
+  $scope.instructorsNoCourses = [];
+  $scope.catastrophicError = [];
+  $scope.userListForICS = [];
   $scope.clickGetCoursesMult = function() {
-    $scope.instructorsNoCourses=[];
-    $scope.catastrophicError=[];
+    $scope.instructorsNoCourses = [];
+    $scope.catastrophicError = [];
     $scope.filterActive = false;
     var userArrayTrimmed = [];
     //remove whitespace from each user
-    if($scope.instructorInputMult.split('\n').length){
-      $scope.instructorInputMultFail=false;
-      _.each($scope.instructorInputMult.split('\n'), function(user){
+    if ($scope.instructorInputMult.split('\n').length) {
+      $scope.instructorInputMultFail = false;
+      _.each($scope.instructorInputMult.split('\n'), function(user) {
         userArrayTrimmed.push(user.trim());
       });
       // remove dupes and falsy values from array
       var userlist = _.compact(_.uniq(userArrayTrimmed));
-      _.each(userlist, function (user){
+      _.each(userlist, function(user) {
         $scope.instructorInput = user.trim();
         $scope.clickGetCourses($scope.instructorInput);
       });
     } else {
-      $scope.instructorInputMultFail=true;
+      $scope.instructorInputMultFail = true;
     }
   };
 
   //triggered with button click
   $scope.clickGetCourses = function() {
-    $scope.filterActive=null;
+    $scope.filterActive = null;
     //reset courses list
     $scope.courses = [];
     $log.info('getting courses');
@@ -97,10 +100,10 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
                 $scope.classListSchedule.push(parsedBody.getSOCSectionListByNbrResponse.ClassOffered);
               });
 
-              if (i + 1 === $scope.courses.length) {
-                //done retrieving courses, stop spinner
-                $scope.loading = false;
-              }
+            if (i + 1 === $scope.courses.length) {
+              //done retrieving courses, stop spinner
+              $scope.loading = false;
+            }
           });
         } else {
           //ESB returned something other than a 200
@@ -112,7 +115,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
                   .then(function(data) {
                     //restart the whole request for classes, each indicidual class
                     $scope.clickGetCoursesMult();
-                });
+                  });
               });
           } else {
             $scope.loading = false;
@@ -161,14 +164,14 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     $scope.preparedEventList = [];
     _.each($scope.classListSchedule, function(course, courseindex) {
 
-      if(course.instructorRole ==='Primary Instructor' && $scope.filterActive){
+      if (course.instructorRole === 'Primary Instructor' && $scope.filterActive) {
         _.each(course.Meeting, function(meeting, i) {
           var newCourse = $.extend(true, {}, course);
           newCourse.Meeting = meeting;
           $scope.preparedEventList.push(newCourse);
         });
       }
-      if(!$scope.filterActive){
+      if (!$scope.filterActive) {
         _.each(course.Meeting, function(meeting, i) {
           var newCourse = $.extend(true, {}, course);
           newCourse.Meeting = meeting;
@@ -228,11 +231,11 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
 
   //filter all users except Primary Instructor roles
   $scope.filterActive = false;
-    $scope.filter = function(entry) {
-      if($scope.filterActive) {
-        return (entry.instructorRole === 'Primary Instructor') ? true: false;
-      }
-      return true;
+  $scope.filter = function(entry) {
+    if ($scope.filterActive) {
+      return (entry.instructorRole === 'Primary Instructor') ? true : false;
+    }
+    return true;
   };
 
 }]);
