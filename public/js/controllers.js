@@ -26,7 +26,6 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
 
   $scope.instructorsNoCourses = [];
   $scope.catastrophicError = [];
-  $scope.userListForICS = [];
   $scope.clickGetCoursesMult = function() {
     $scope.instructorsNoCourses = [];
     $scope.catastrophicError = [];
@@ -69,12 +68,10 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
             if ($.isArray(parsedBody.getInstrClassListResponse.InstructedClass)) {
               // ESB returns an array when multiple courses
               $scope.courses = parsedBody.getInstrClassListResponse.InstructedClass;
-              $scope.userListForICS.push(userId);
 
             } else {
               // ESB returns an object with one course - turn it into an array
               $scope.courses = [].concat(parsedBody.getInstrClassListResponse.InstructedClass);
-              $scope.userListForICS.push(userId);
             }
           } else {
             // ESB has returned nothing
@@ -148,8 +145,8 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     iCal = "data:text/calendar;charset=utf-8," + iCal;
     var link = document.createElement("a");
     link.setAttribute("href", encodeURI(iCal));
-    // the filename will need to be different for multiples
-    link.setAttribute("download", _.uniq($scope.userListForICS).join('-') + '.ics');
+    // filename set to uniqname list
+    link.setAttribute("download", _.uniq(_.pluck($scope.preparedEventList, 'uniqname')).join('-') + '.ics');
     document.body.appendChild(link);
     setTimeout(function() {
       link.click();
