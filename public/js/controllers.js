@@ -53,7 +53,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     $scope.filterActive = null;
     //reset courses list
     $scope.courses = [];
-    $log.info('getting courses');
+    $log.info('getting courses for ' + $scope.instructorInput);
     //start spinner
     $scope.loading = true;
     var termId = $scope.termInput.id;
@@ -82,6 +82,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
           // loop over courses array and call another API
           // to get course details
           _.each($scope.courses, function(course, i) {
+            $log.info('getting details on course ' + course.SubjectCode + ' ' + course.CatalogNumber + ' ' + course.SectionNumber + ' ' + '(' + course.CatalogNumber + ')');
             Get.getCourse(termId, course.ClassNumber)
               .then(function(coursedata) {
 
