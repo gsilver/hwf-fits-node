@@ -9,6 +9,6 @@ RUN npm install
 EXPOSE 8090
 #CMD /bin/bash
 #run start up from shell script
-COPY run.sh usr/local/app/
-RUN chmod +x usr/local/app/run.sh
-CMD usr/local/app/run.sh
+COPY run.sh /usr/local/app/
+RUN chmod +x /usr/local/app/run.sh
+CMD /usr/local/app/run.sh
