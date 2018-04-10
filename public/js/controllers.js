@@ -8,25 +8,35 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
   });
   //get the tokens on page load
   Get.getTokens('instructors')
-    .then(function(data) {});
-  Get.getTokens('umscheduleofclasses')
     .then(function(data) {
-      Get.getTerms().then(function(terms) {
-        $scope.terms = [];
-        _.each(terms.data.getSOCTermsResponse.Term, function(term) {
-          $scope.terms.push({
-            'id': term.TermCode,
-            'name': term.TermDescr
+      // should really check that the token was gotten
+    });
+    Get.getTokens('umscheduleofclasses')
+      .then(function(data) {
+        // should really check that the token was gotten
+        Get.getTerms().then(function(terms) {
+          $scope.terms = [];
+          _.each(terms.data.getSOCTermsResponse.Term, function(term) {
+            // used to populate the term select
+            $scope.terms.push({
+              'id': term.TermCode,
+              'name': term.TermDescr
+            });
           });
-        });
+        // sort them by term id, so current will be the first
         $scope.terms = _.sortBy($scope.terms, 'id');
+        // set the default term to the first (the current term)
         $scope.termInput = $scope.terms[0];
       });
     });
 
+  //reset some result flags
   $scope.instructorsNoCourses = [];
   $scope.catastrophicError = [];
+
+  // user clicks on "Lookup list" button
   $scope.clickGetCoursesMult = function() {
+    // reset any previous lookup results and filters
     $scope.instructorsNoCourses = [];
     $scope.catastrophicError = [];
     $scope.filterActive = false;
@@ -48,7 +58,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     }
   };
 
-  //triggered with button click
+  // triggered as many times as users are in the list
   $scope.clickGetCourses = function() {
     $scope.filterActive = null;
     //reset courses list
@@ -56,25 +66,27 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     $log.info('getting courses for ' + $scope.instructorInput);
     //start spinner
     $scope.loading = true;
+    // pick up term values (used in request) from select element
     var termId = $scope.termInput.id;
     var userId = $scope.instructorInput;
     //we will be pushing the course objects into this array
     $scope.classListSchedule = [];
+    // get the courses for this instructor
     Get.getCourses(termId, userId)
       .then(function(data) {
         if (data.data.statusCode === 200) {
           var parsedBody = JSON.parse(data.data.body);
           if (parsedBody.getInstrClassListResponse.InstructedClass) {
+            // ESB returns an array when multiple courses
             if ($.isArray(parsedBody.getInstrClassListResponse.InstructedClass)) {
-              // ESB returns an array when multiple courses
               $scope.courses = parsedBody.getInstrClassListResponse.InstructedClass;
-
             } else {
               // ESB returns an object with one course - turn it into an array
               $scope.courses = [].concat(parsedBody.getInstrClassListResponse.InstructedClass);
             }
           } else {
-            // ESB has returned nothing
+            // ESB has returned nothing, add instructor to list of people we
+            // found no courses for, stop the spinner
             $scope.instructorsNoCourses.push(userId);
             $scope.courses = [];
             $scope.loading = false;
@@ -85,7 +97,6 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
             $log.info('getting details on course ' + course.SubjectCode + ' ' + course.CatalogNumber + ' ' + course.SectionNumber + ' ' + '(' + course.CatalogNumber + ')');
             Get.getCourse(termId, course.ClassNumber)
               .then(function(coursedata) {
-
                 var parsedBody = coursedata.data;
                 if (parsedBody.getSOCSectionListByNbrResponse.ClassOffered.Meeting.length === undefined) {
                   // ESB has returned an object Meeting as there is only one, so turn into an array
@@ -104,14 +115,14 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
             }
           });
         } else {
-          //ESB returned something other than a 200
+          //ESB returned something other than a 200, a token has probably expired
           if (data.data.statusCode === 401) {
             $log.info('got a 401 on courses');
             Get.getTokens('instructors')
               .then(function(data) {
                 Get.getTokens('umscheduleofclasses')
                   .then(function(data) {
-                    //restart the whole request for classes, each indicidual class
+                    //restart the whole request for classes, each individual class
                     $scope.clickGetCoursesMult();
                   });
               });
@@ -123,7 +134,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
       });
   };
 
-  //lookup building based on abbrv used in data (good luck)
+  //lookup building based on abbrv used in data (good luck! why is there no cannonical dictionary for this?)
   var getBuilding = function(building) {
     //given a string, split it and look for the second term in the building array
     // which is the building abbreviation
@@ -146,7 +157,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     iCal = "data:text/calendar;charset=utf-8," + iCal;
     var link = document.createElement("a");
     link.setAttribute("href", encodeURI(iCal));
-    // filename set to uniqname list
+    // filename set to uniqname list, concatenated and separated by dashes
     link.setAttribute("download", _.uniq(_.pluck($scope.preparedEventList, 'uniqname')).join('-') + '.ics');
     document.body.appendChild(link);
     setTimeout(function() {
@@ -156,12 +167,13 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
 
   // click handler for "download ICS" button
   $scope.prepareICS = function(instructorInput) {
-    // need to manipulate the array to produce as many objects
+    // the $scope.classListSchedule array has a Meeting object or array of Meetings
+    // and we are interested in creating a calendar entry for each meeting
+    // so we need to manipulate the array to produce as many objects
     // as Meeting objects all of the array objects contain
-    // this is so that the conversion to ICS is more straigthforward
     $scope.preparedEventList = [];
     _.each($scope.classListSchedule, function(course, courseindex) {
-
+      // id the user has selected only Prim. Inst.  so only these meetings will be included
       if (course.instructorRole === 'Primary Instructor' && $scope.filterActive) {
         _.each(course.Meeting, function(meeting, i) {
           var newCourse = $.extend(true, {}, course);
@@ -169,6 +181,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
           $scope.preparedEventList.push(newCourse);
         });
       }
+      // no fiters active - so include all
       if (!$scope.filterActive) {
         _.each(course.Meeting, function(meeting, i) {
           var newCourse = $.extend(true, {}, course);
@@ -177,19 +190,20 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
         });
       }
     });
-    // get the envent length (so that when we loop
+    // get the event length (so that when we loop
     // though the array we know when it is done and we can trigger the download)
     var arrayLen = $scope.preparedEventList.length;
     //initialie the iCal
     var iCal = 'BEGIN:VCALENDAR\n' +
       'VERSION:2.0\n' +
       'PRODID:-//CLASS//CALENDAR//GENERATOR//UMICH//EDU\n';
-    // loop through the preparedEventList and create an event for each object in array
+    // loop through the $scope.preparedEventList array and create an event for each object in array
     _.each($scope.preparedEventList, function(course, i) {
-      // munge some values
+      // munge some values into formats iCal likes
       var time = course.Meeting.Times.split(' - ');
       var timeStart = moment(time[0], 'HHA').format('k0000');
       var timeEnd = moment(time[1], 'HHA').format('k0000');
+      // add course topic if exists
       var courseTopic = course.ClassTopic ? course.ClassTopic : '';
       var building = '';
       // lookup the building if needed
@@ -206,7 +220,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
           days.push(key.toUpperCase());
         }
       });
-      // assemble this event from oject values
+      // assemble this event from meeting object values and the munged values above
       iCal = iCal +
         'BEGIN:VEVENT\n' +
         'SUMMARY:' + course.uniqname + ' - ' + course.SubjectCode + ' ' + course.CatalogNumber + ' ' + course.SectionNumber + ' Meeting: ' + course.Meeting.MeetingNumber + '\n' +
@@ -227,7 +241,7 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
     });
   };
 
-  //filter all users except Primary Instructor roles
+  //filter all users except Primary Instructor roles (a toggle checkbox)
   $scope.filterActive = false;
   $scope.filter = function(entry) {
     if ($scope.filterActive) {
