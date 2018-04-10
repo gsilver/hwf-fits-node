@@ -11,4 +11,7 @@ EXPOSE 8090
 #run start up from shell script
 COPY run.sh /usr/local/app/
 RUN chmod +x /usr/local/app/run.sh
+RUN mkdir -p /opt/secrets/
+RUN rm /usr/local/app/.env
+RUN ln -s /opt/secrets/.env /usr/local/app/.env
 CMD /usr/local/app/run.sh
