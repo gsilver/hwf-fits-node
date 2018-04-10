@@ -12,6 +12,6 @@ EXPOSE 8090
 COPY run.sh /usr/local/app/
 RUN chmod +x /usr/local/app/run.sh
 RUN mkdir -p /opt/secrets/
-RUN rm /usr/src/app/.env
+#RUN rm /usr/src/app/.env
 RUN ln -s /opt/secrets/.env /usr/src/app/.env
 CMD /usr/local/app/run.sh
