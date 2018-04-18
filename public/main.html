@@ -21,151 +21,155 @@
 
 <body ng-app="scheduleApp" ng-cloak>
   <div class="container" ng-controller="mainController">
-    <h1>FITS <small>(Faculty Instructional Teaching Scheduler)</small></h1>
-    <div class="row">
-      <div class="col-md-6">
-        <div class="form-group">
-          <label for="termSelect">Term</label>
-          <select name="term" id="termSelect" class="form-control"  ng-model="termInput"  ng-options="term.name for term in terms">
-          </select>
-        </div>
-        <div class="form-group">
-          <!-- <label for="instructor">Instructor</label> -->
-          <label for="instructorMult">Instructor list</label>
-          <div class="input-group">
-            <!-- <input type="text" ng-model="instructorInput" class="form-control" id="instructor" aria-describedby="instructorDescription" placeholder="Enter uniqname"> -->
-            <textarea rows="10" ng-model="instructorInputMult" class="form-control" id="instructorMult" aria-describedby="instructorDescription" placeholder="Enter list of uniqnames, one per line"></textarea>
-            <div class="input-group-addon"><i class="glyphicon glyphicon-user"></i></div>
-          </div>
-          <small id="instructorDescription" class="form-text text-muted">Test users: eickmeya, oliviaor, lmakman, adelab, mfarron, seeleya, lucyloc</small>
-        </div>
-        <div class="alert alert-danger" ng-show="lookUpPersonError && instructorInput">{{instructorInput}} does not exist</div>
-        <button class="btn btn-primary" ng-disabled="loading || !instructorInputMult.split('\n').length" ng-click="clickGetCoursesMult(instructorInputMult)">
-          Lookup list
-          <i ng-show="loading" class="glyphicon glyphicon-refresh glyphicon-spin"></i>
-        </button>
-        <span ng-show="loading"> Working hard!</span>
-        <span ng-show="instructorInputMultFail">Please supply some uniqnames.</span>
-      </div>
-      <div class="col-md-6">
-        <div>
-          <p>Look up {{instructorInputMult.split('\n').length}} user's teaching assignments. If all looks well, download a <strong>.ics</strong> file to import into you calendar</p>
-        </div>
-        <div class="alert alert-danger" ng-show="catastrophicError.length && !loading">
-          There was an error looking up <strong ng-repeat="instructor in catastrophicError">{{instructor}}<span ng-if="!$last">, </span></strong>. <br>Quite possibly locked and unavailable in MPath QA.
-        </div>
-        <div class="alert alert-info" ng-show="instructorsNoCourses.length">
-          No courses found for <strong ng-repeat="instructor in instructorsNoCourses">{{instructor}}<span ng-if="!$last">, </span></strong> for {{termInput.name}}
-        </div>
-        <div class="alert alert-danger" role="alert" ng-show="courseFailures.length">
-          <strong> Following courses failed to be looked up:</strong>
-          <ol>
-            <li ng-repeat="failure in courseFailures">
-              {{failure.SubjectCode}} - {{failure.SectionNumber}}
-            </li>
-          </ol>
 
-        </div>
-      </div>
-    </div>
-    <br><br>
-      <div ng-show="classListSchedule.length"  class="checkbox alert alert-info" style="padding:5px">
-          <label for="primaryFilter"><input type="checkbox" ng-model="filterActive" id="primaryFilter">
-             Select only Primary Instructor roles
-             <strong ng-show="filterActive">(now showing only Primary Instructor roles)</strong><strong ng-show="!filterActive">(now showing all roles)</strong>
-          </label>
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">FITS</a></li>
+      <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">MComm</a></li>
+    </ul>
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="home">
 
-      </div>
-      <div class="alert alert-danger" ng-show="filtered.length === 0 && !loading && filterActive ">
-        No classes where this user or users is the Primary Instructor
-      </div>
-      <table class="table table-hover" ng-show="classListSchedule.length && filtered.length !== 0">
-      <thead>
-        <tr>
-          <th scope="col">
-            Title
-          </th>
-          <th scope="col">
-            Instructor
-          </th>
 
-          <th scope="col">
-            Section
-          </th>
-          <th scope="col">
-            Section type
-          </th>
-          <th scope="col">
-            Meetings
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="class in classListSchedule | orderBy:'uniqname' |  filter:filter as filtered">
-          <td>
-            {{class.SubjectCode}} {{class.CatalogNumber}}
-            <small ng-show="class.CourseDescr">
-              <br>
-              {{class.CourseDescr}}
-            </small>
-          </td>
-          <td>
-            {{class.uniqname}}<br>
-             <small ng-class="class.uniqname === class.Instructor.Uniqname.toLowerCase()?'bold':''">{{class.instructorRole}}</small>
-          </td>
-          <td>
-            {{class.SectionNumber}}
-          </td>
-          <td>
-            {{class.SectionTypeDescr}}
-          </td>
-          <td>
-            <div ng-repeat="meeting in class.Meeting" class="row">
-              <div class="col-md-1">
-                {{meeting.Days}}
-              </div>
-              <div class="col-md-4">
-                {{meeting.Times}}
-              </div>
-              <div class="col-md-3">
-                <span ng-if="meeting.StartDate === meeting.EndDate" style="white-space: nowrap">{{meeting.StartDate}}</span>
-                <span ng-if="meeting.StartDate !== meeting.EndDate"  style="white-space: nowrap">{{meeting.StartDate}} - {{meeting.EndDate}}</span>
-              </div>
-              <div class="col-md-3" style="text-align:right">
-                {{meeting.Location}} <br>
-                <small ng-class="class.uniqname === class.Instructor.Uniqname.toLowerCase()?'bold':''">{{meeting.Instructors.split(',').join(', ')}}</small>
-              </div>
+        <h1>FITS <small>(Faculty Instructional Teaching Scheduler)</small></h1>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="termSelect">Term</label>
+              <select name="term" id="termSelect" class="form-control" ng-model="termInput" ng-options="term.name for term in terms">
+                  </select>
             </div>
-          </td>
-        </tr>
-      </tbody>
+            <div class="form-group">
+              <!-- <label for="instructor">Instructor</label> -->
+              <label for="instructorMult">Instructor list</label>
+              <div class="input-group">
+                <!-- <input type="text" ng-model="instructorInput" class="form-control" id="instructor" aria-describedby="instructorDescription" placeholder="Enter uniqname"> -->
+                <textarea rows="10" ng-model="instructorInputMult" class="form-control" id="instructorMult" aria-describedby="instructorDescription" placeholder="Enter list of uniqnames, one per line"></textarea>
+                <div class="input-group-addon"><i class="glyphicon glyphicon-user"></i></div>
+              </div>
+              <small id="instructorDescription" class="form-text text-muted">Test users: eickmeya, oliviaor, lmakman, adelab, mfarron, seeleya, lucyloc</small>
+            </div>
+            <div class="alert alert-danger" ng-show="lookUpPersonError && instructorInput">{{instructorInput}} does not exist</div>
+            <button class="btn btn-primary" ng-disabled="loading || !instructorInputMult.split('\n').length" ng-click="clickGetCoursesMult(instructorInputMult)">
+                  Lookup list
+                  <i ng-show="loading" class="glyphicon glyphicon-refresh glyphicon-spin"></i>
+                </button>
+            <span ng-show="loading"> Working hard!</span>
+            <span ng-show="instructorInputMultFail">Please supply some uniqnames.</span>
+          </div>
+          <div class="col-md-6">
+            <div>
+              <p>Look up {{instructorInputMult.split('\n').length}} user's teaching assignments. If all looks well, download a <strong>.ics</strong> file to import into you calendar</p>
+            </div>
+            <div class="alert alert-danger" ng-show="catastrophicError.length && !loading">
+              There was an error looking up <strong ng-repeat="instructor in catastrophicError">{{instructor}}<span ng-if="!$last">, </span></strong>. <br>Quite possibly locked and unavailable in MPath QA.
+            </div>
+            <div class="alert alert-info" ng-show="instructorsNoCourses.length">
+              No courses found for <strong ng-repeat="instructor in instructorsNoCourses">{{instructor}}<span ng-if="!$last">, </span></strong> for {{termInput.name}}
+            </div>
+            <div class="alert alert-danger" role="alert" ng-show="courseFailures.length">
+              <strong> Following courses failed to be looked up:</strong>
+              <ol>
+                <li ng-repeat="failure in courseFailures">
+                  {{failure.SubjectCode}} - {{failure.SectionNumber}}
+                </li>
+              </ol>
 
-    </table>
-    <div ng-show="classListSchedule.length && filtered.length !== 0">
-      <button type="button" class="btn btn-primary" ng-click="prepareICS()">
-        This is fine, download ICS
-      </button> <small>(for importing into Google calendar <strong ng-show="filterActive"> -  only the Primary Instructors</strong>)</small>
-    </div>
+            </div>
+          </div>
+        </div>
+        <br><br>
+        <div ng-show="classListSchedule.length" class="checkbox alert alert-info" style="padding:5px">
+          <label for="primaryFilter"><input type="checkbox" ng-model="filterActive" id="primaryFilter">
+                     Select only Primary Instructor roles
+                     <strong ng-show="filterActive">(now showing only Primary Instructor roles)</strong><strong ng-show="!filterActive">(now showing all roles)</strong>
+                  </label>
 
-    <br>
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Lookup MComm people</h3>
+        </div>
+        <div class="alert alert-danger" ng-show="filtered.length === 0 && !loading && filterActive ">
+          No classes where this user or users is the Primary Instructor
+        </div>
+        <table class="table table-hover" ng-show="classListSchedule.length && filtered.length !== 0">
+          <thead>
+            <tr>
+              <th scope="col">
+                Title
+              </th>
+              <th scope="col">
+                Instructor
+              </th>
+
+              <th scope="col">
+                Section
+              </th>
+              <th scope="col">
+                Section type
+              </th>
+              <th scope="col">
+                Meetings
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="class in classListSchedule | orderBy:'uniqname' |  filter:filter as filtered">
+              <td>
+                {{class.SubjectCode}} {{class.CatalogNumber}}
+                <small ng-show="class.CourseDescr">
+                      <br>
+                      {{class.CourseDescr}}
+                    </small>
+              </td>
+              <td>
+                {{class.uniqname}}<br>
+                <small ng-class="class.uniqname === class.Instructor.Uniqname.toLowerCase()?'bold':''">{{class.instructorRole}}</small>
+              </td>
+              <td>
+                {{class.SectionNumber}}
+              </td>
+              <td>
+                {{class.SectionTypeDescr}}
+              </td>
+              <td>
+                <div ng-repeat="meeting in class.Meeting" class="row">
+                  <div class="col-md-1">
+                    {{meeting.Days}}
+                  </div>
+                  <div class="col-md-4">
+                    {{meeting.Times}}
+                  </div>
+                  <div class="col-md-3">
+                    <span ng-if="meeting.StartDate === meeting.EndDate" style="white-space: nowrap">{{meeting.StartDate}}</span>
+                    <span ng-if="meeting.StartDate !== meeting.EndDate" style="white-space: nowrap">{{meeting.StartDate}} - {{meeting.EndDate}}</span>
+                  </div>
+                  <div class="col-md-3" style="text-align:right">
+                    {{meeting.Location}} <br>
+                    <small ng-class="class.uniqname === class.Instructor.Uniqname.toLowerCase()?'bold':''">{{meeting.Instructors.split(',').join(', ')}}</small>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+        <div ng-show="classListSchedule.length && filtered.length !== 0">
+          <button type="button" class="btn btn-primary" ng-click="prepareICS()">
+                This is fine, download ICS
+              </button> <small>(for importing into Google calendar <strong ng-show="filterActive"> -  only the Primary Instructors</strong>)</small>
+        </div>
       </div>
-      <div class="panel-body">
+      <div role="tabpanel" class="tab-pane" id="profile">
+        <h3>MComm people details</h3>
         <div class="row">
           <div class="col-md-6">
             <div class="form-group">
               <label for="mcommList">Look up MComm Users</label>
               <div class="input-group">
-                <textarea rows="10" ng-model="mcommList" class="form-control" id="mcommList"
-                  placeholder="Enter list of uniqnames, one per line"></textarea>
+                <textarea rows="10" ng-model="mcommList" class="form-control" id="mcommList" placeholder="Enter list of uniqnames, one per line"></textarea>
                 <div class="input-group-addon"><i class="glyphicon glyphicon-user"></i></div>
               </div>
               <br>
               <button type="button" class="btn btn-primary" ng-click="lookupMComm()">
-                Lookup
-              </button>
+                    Lookup
+                  </button>
             </div>
             <div class="col-md-6">
             </div>
@@ -210,20 +214,23 @@
           <div>
             uniqname,name.affiliation,title,address,phone<br>
             <span ng-repeat="advisor in advisorDataList track by $index">
-              {{advisor.uniqname}},
-              {{advisor.name}},
-              {{advisor.affiliation.join(' - ')}},
-              {{advisor.title.join(' - ')}},
-              {{advisor.address.join(' - ')}},
-              {{advisor.phone.join(' - ')}}
-              <br>
-            </span>
+                  {{advisor.uniqname}},
+                  {{advisor.name}},
+                  {{advisor.affiliation.join(' - ')}},
+                  {{advisor.title.join(' - ')}},
+                  {{advisor.address.join(' - ')}},
+                  {{advisor.phone.join(' - ')}}
+                  <br>
+                </span>
           </div>
         </div>
 
       </div>
+
+
+      <br>
+
     </div>
-  </div>
   </div>
 
 
