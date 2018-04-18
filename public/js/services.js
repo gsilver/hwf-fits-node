@@ -7,6 +7,12 @@ scheduleApp.factory('Get', function($http, $rootScope, $log) {
         return data;
       });
     },
+    getMComm: function(userId) {
+      $log.info('factory request for MComm info');
+      return $http.get('/api/mcomm/' + userId).then(function(data) {
+        return data;
+      });
+    },
     // call node rest api (in routes.js) to get courses from ESB
     getCourses: function(termId, userId) {
       $log.info('factory request for courses for term ' + termId + ' for user ' + userId);

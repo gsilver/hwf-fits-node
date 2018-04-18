@@ -7,9 +7,16 @@ module.exports = function (app) {
   app.get('/api/tokens/:scope', function (req, res) {
     // request comes from front end with scope (required by ESB) as a param
     console.log('getting the token for ' + req.params.scope);
+    var url;
+    if(req.params.scope ==='mcommunity'){
+      url = '/um/inst/oauth2/token';
+    } else {
+      url= '/um/aa/oauth2/token';
+    }
+
     var options = {
       method: 'POST',
-      url: process.env.APISERVER  + '/um/aa/oauth2/token',
+      url: process.env.APISERVER  + url,
       headers:
       {
         accept: 'application/json',
@@ -30,6 +37,7 @@ module.exports = function (app) {
       }
       else {
         var bodyObj = JSON.parse(body);
+
         app.locals[req.params.scope + '_token'] = bodyObj.access_token;
         // return 'ok' - could be anything
         res.send('ok');
@@ -95,6 +103,26 @@ module.exports = function (app) {
       res.send(body);
     });
   });
+
+  app.get('/api/mcomm/:user_id', function (req, res) {
+    // get the mcomm details for a user
+    var options = {
+      method: 'GET',
+      url: process.env.APISERVER  + '/um/MCommunity/People/' + req.params.user_id,
+      headers: {
+        accept: 'application/json',
+        authorization: 'Bearer '  + app.locals.mcommunity_token,
+        'x-ibm-client-id': process.env.CLIENTID
+      }
+    };
+
+    request(options, function (error, response, body) {
+      if (error) return console.error('Failed: %s', error.message);
+      res.send(body);
+    });
+  });
+
+
 
   app.get('/', function (req, res) {
     // load main.html when the route is '/'

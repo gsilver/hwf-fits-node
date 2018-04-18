@@ -6,6 +6,10 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
   Get.getBuildings('data/location/buildings.json').then(function(buildingData) {
     $scope.buildings = buildingData.data;
   });
+  Get.getTokens('mcommunity').then(function(data){
+    $scope.mcommAvailable = true;
+  });
+
   //get the tokens on page load
   Get.getTokens('instructors')
     .then(function(data) {
@@ -240,6 +244,50 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
       }
     });
   };
+
+
+$scope.lookupMComm = function(){
+  $scope.advisorDataList =[];
+  var userArrayTrimmed = [];
+  //remove whitespace from each user
+  if ($scope.mcommList.split('\n').length) {
+    _.each($scope.mcommList.split('\n'), function(user) {
+      userArrayTrimmed.push(user.trim());
+    });
+    // remove dupes and falsy values from array
+    var userlist = _.compact(_.uniq(userArrayTrimmed));
+    _.each(userlist, function(user) {
+      $scope.advisorInput = user.trim();
+      console.log(user);
+      $scope.clickMCommAff($scope.advisorInput);
+    });
+  } else {
+    //$scope.instructorInputMultFail = true;
+  }
+};
+$scope.clickMCommAff = function(user){
+  Get.getMComm(user)
+  .then(function(data) {
+    if (data.status === 200) {
+      var advisor = data.data.person;
+      $scope.advisorDataList.push({
+        'uniqname':advisor.uniqname,
+        'affiliation':advisor.affiliation,
+        'name':advisor.displayName,
+        'title':advisor.title,
+        'address': advisor.workAddress,
+        'phone': advisor.workPhone
+      });
+      // loop over courses array and call another API
+      // to get course details
+    } else {
+      //ESB returned something other than a 200, a token has probably expired
+      if (data.data.statusCode === 401) {
+        $log.info('got a 401 asking about MComm person');
+      }
+    }
+  });
+}
 
   //filter all users except Primary Instructor roles (a toggle checkbox)
   $scope.filterActive = false;
