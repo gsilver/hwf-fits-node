@@ -1,3 +1,4 @@
+
 //TODO: package with Bower/Grunt
 //TODO: use blob to force download for IE
 scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', function($scope, $http, $log, Get) {
@@ -248,46 +249,67 @@ scheduleApp.controller('mainController', ['$scope', '$http', '$log', 'Get', func
 
 $scope.lookupMComm = function(){
   $scope.advisorDataList =[];
+  $scope.advisorDataListCSV=[];
+  $scope.mcloading=true;
   var userArrayTrimmed = [];
   //remove whitespace from each user
+
   if ($scope.mcommList.split('\n').length) {
-    _.each($scope.mcommList.split('\n'), function(user) {
+    _.each($scope.mcommList.split('\n'), function(user, i) {
       userArrayTrimmed.push(user.trim());
     });
     // remove dupes and falsy values from array
     var userlist = _.compact(_.uniq(userArrayTrimmed));
-    _.each(userlist, function(user) {
+      $scope.loopLength = userlist.length;
+    _.each(userlist, function(user, i) {
       $scope.advisorInput = user.trim();
-      console.log(user);
-      $scope.clickMCommAff($scope.advisorInput);
+      $scope.clickMCommAff($scope.advisorInput, i);
     });
   } else {
     //$scope.instructorInputMultFail = true;
   }
 };
-$scope.clickMCommAff = function(user){
+//ESB data has the issue that it will produce an array, an object or a string
+// so turn all suspect values to an array
+var fixSillyESBShennanigans = function(thing){
+  if(Array.isArray(thing)){
+    return(thing);
+  } else if((typeof thing === "object") && (thing !== null)){
+    return([].concat(thing));
+  } else {
+    return([].concat(thing));
+  }
+};
+
+$scope.clickMCommAff = function(user, i){
   Get.getMComm(user)
   .then(function(data) {
+    if(i + 1 === $scope.loopLength){
+      $scope.mcloading=false;
+    }
+
     if (data.status === 200) {
       var advisor = data.data.person;
       $scope.advisorDataList.push({
         'uniqname':advisor.uniqname,
-        'affiliation':advisor.affiliation,
         'name':advisor.displayName,
-        'title':advisor.title,
-        'address': advisor.workAddress,
-        'phone': advisor.workPhone
+        'affiliation':fixSillyESBShennanigans(advisor.affiliation),
+        'title':fixSillyESBShennanigans(advisor.title),
+        'address': fixSillyESBShennanigans(advisor.workAddress).join(' | ').replace(/\$/g,'\n'),
+        'phone': fixSillyESBShennanigans(advisor.workPhone)
       });
-      // loop over courses array and call another API
-      // to get course details
     } else {
       //ESB returned something other than a 200, a token has probably expired
       if (data.data.statusCode === 401) {
         $log.info('got a 401 asking about MComm person');
       }
     }
+    if(i + 1 === $scope.loopLength){
+      $scope.advisorDataList = _.sortBy($scope.advisorDataList, 'uniqname');
+      $scope.mcloading=false;
+    }
   });
-}
+};
 
   //filter all users except Primary Instructor roles (a toggle checkbox)
   $scope.filterActive = false;

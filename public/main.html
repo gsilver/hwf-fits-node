@@ -20,8 +20,9 @@
 </head>
 
 <body ng-app="scheduleApp" ng-cloak>
-  <div class="container" ng-controller="mainController">
 
+  <div class="container" ng-controller="mainController">
+  <h1>Some utilities <small>using data from the UM-Enterprise Service Bus</small></h1>
     <ul class="nav nav-tabs" role="tablist">
       <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">FITS</a></li>
       <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">MComm</a></li>
@@ -30,7 +31,7 @@
       <div role="tabpanel" class="tab-pane active" id="home">
 
 
-        <h1>FITS <small>(Faculty Instructional Teaching Scheduler)</small></h1>
+        <h2>FITS <small>(Faculty Instructional Teaching Scheduler)</small></h2>
         <div class="row">
           <div class="col-md-6">
             <div class="form-group">
@@ -157,7 +158,7 @@
         </div>
       </div>
       <div role="tabpanel" class="tab-pane" id="profile">
-        <h3>MComm people details</h3>
+        <h2>MComm people details</h2>
         <div class="row">
           <div class="col-md-6">
             <div class="form-group">
@@ -168,10 +169,13 @@
               </div>
               <br>
               <button type="button" class="btn btn-primary" ng-click="lookupMComm()">
-                    Lookup
-                  </button>
+                Lookup
+                <i ng-show="mcloading" class="glyphicon glyphicon-refresh glyphicon-spin"></i>
+              </button>
+              <span ng-show="mcloading"> Working hard!</span>
             </div>
             <div class="col-md-6">
+
             </div>
           </div>
         </div>
@@ -202,28 +206,13 @@
             <tr ng-repeat="advisor in advisorDataList track by $index">
               <td>{{advisor.uniqname}}</td>
               <td>{{advisor.name}}</td>
-              <td>{{advisor.affiliation.toString()}}</td>
-              <td>{{advisor.title.toString()}}</td>
+              <td>{{advisor.affiliation.join(' | ')}}</td>
+              <td>{{advisor.title.join(' | ')}}</td>
               <td>{{advisor.address}}</td>
               <td>{{advisor.phone.toString()}}</td>
             </tr>
           </tbody>
         </table>
-        <div ng-show="advisorDataList.length">
-          <h3>CSV</h3>
-          <div>
-            uniqname,name.affiliation,title,address,phone<br>
-            <span ng-repeat="advisor in advisorDataList track by $index">
-                  {{advisor.uniqname}},
-                  {{advisor.name}},
-                  {{advisor.affiliation.join(' - ')}},
-                  {{advisor.title.join(' - ')}},
-                  {{advisor.address.join(' - ')}},
-                  {{advisor.phone.join(' - ')}}
-                  <br>
-                </span>
-          </div>
-        </div>
 
       </div>
 
