@@ -5,8 +5,10 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
-
+  <title>ESB Utilities</title>
+  <style>
+  .address{white-space: pre-line}
+  </style>
   <!-- Bootstrap -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
@@ -175,11 +177,9 @@
               <span ng-show="mcloading"> Working hard!</span>
             </div>
             <div class="col-md-6">
-
             </div>
           </div>
         </div>
-
         <table class="table table-striped table-hover" ng-show="advisorDataList.length" style="font-size:90%">
           <thead>
             <tr>
@@ -192,25 +192,23 @@
               <th scope="col">
                 Affiliation
               </th>
-              <th scope="col">
-                Title
-              </th>
-              <!-- <th scope="col">
-                Address
-              </th>
-              <th scope="col">
-                Phone numbers
-              </th> -->
             </tr>
           </thead>
           <tbody>
             <tr ng-repeat="advisor in advisorDataList track by $index">
               <td>{{advisor.uniqname}}</td>
-              <td>{{advisor.name}}</td>
-              <td style="white-space: pre-line;">{{advisor.affiliation.join('\n')}}</td>
-              <td style="white-space: pre-line;">{{advisor.title.join('\n')}}</td>
-              <td  style="white-space: pre-line;">{{advisor.address}}</td>
-              <td style="white-space: pre-line;">{{advisor.phone.join('\n')}}</td>
+              <td>
+                {{advisor.name}}
+                <a ng-hide="!advisor.address" href="" data-placement="top" popover data-trigger="click" data-html="true" data-selector="" data-original-title="{{advisor.name}}'s Address" data-content="<div class='address'>{{advisor.address}}</div>">Address</a>
+                <span ng-show="advisor.address && advisor.phone[0]"> | </span>
+                <a ng-hide="!advisor.phone[0]" href="" data-placement="bottom" popover data-trigger="click" data-html="true" data-selector="" data-original-title="{{advisor.name}}'s Phone" data-content="<div class='address'>{{advisor.phone.join('\n')}}</div>">Phone</a>
+                <span ng-show="advisor.phone[0] && advisor.title[0]"> | </span>
+                <a ng-hide="!advisor.title[0]"  href="" data-placement="right" popover data-trigger="click" data-html="true" data-selector="" data-original-title="{{advisor.name}}'s Title(s)" data-content="<div class='address'>{{advisor.title[0].split(',').join('\n')}}</div>">Title</a>
+              </td>
+              <td>
+                <span ng-show="advisor.affiliation.length" style="white-space: pre-line;">{{advisor.affiliation.join('\n')}}</span></td>
+                <span ng-show="!advisor.affiliation.length">{{advisor.affiliation}}</span>
+              </td>
             </tr>
           </tbody>
         </table>

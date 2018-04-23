@@ -46,3 +46,9 @@ scheduleApp.factory('Get', function($http, $rootScope, $log) {
     },
   };
 });
+
+scheduleApp.directive('popover', function() {
+   return function(scope, elem) {
+      elem.popover();
+   };
+});

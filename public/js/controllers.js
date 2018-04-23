@@ -287,7 +287,6 @@ $scope.clickMCommAff = function(user, i){
     if(i + 1 === $scope.loopLength){
       $scope.mcloading=false;
     }
-
     if (data.status === 200) {
       var advisor = data.data.person;
       $scope.advisorDataList.push({
@@ -295,7 +294,7 @@ $scope.clickMCommAff = function(user, i){
         'name':advisor.displayName,
         'affiliation':fixSillyESBShennanigans(advisor.affiliation),
         'title':fixSillyESBShennanigans(advisor.title),
-        'address': fixSillyESBShennanigans(advisor.workAddress).join(' | ').replace(/\$/g,'\n'),
+        'address': fixSillyESBShennanigans(advisor.workAddress).join('\n\n').replace(/\$/g,'\n'),
         'phone': fixSillyESBShennanigans(advisor.workPhone)
       });
     } else {
@@ -319,5 +318,4 @@ $scope.clickMCommAff = function(user, i){
     }
     return true;
   };
-
 }]);
